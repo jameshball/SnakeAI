@@ -1,0 +1,53 @@
+class Snake {
+  PVector pos;
+  ArrayList<PVector> body = new ArrayList<PVector>();
+  int direction;
+  boolean dead = false;
+  
+  Snake(int gridX, int gridY) {
+    pos = new PVector((int)random(1, gridX), (int)random(1, gridY));
+    body.add(new PVector(pos.x, pos.y));
+    direction = -1;
+  }
+  
+  void update() {
+    switch(direction){
+      case 0:
+        moveHead(0, 1);
+        break;
+      case 1:
+        moveHead(1, 0);
+        break;
+      case 2:
+        moveHead(0, -1);
+        break;
+      case 3:
+        moveHead(-1, 0);
+        break;
+    }
+  }
+  
+  void moveHead(int x, int y) {
+    pos.x += x;
+    pos.y += y;
+  }
+  
+  void extend() {
+    body.add(new PVector(pos.x, pos.y));
+  }
+  
+  void move() {
+    body.remove(0);
+    body.add(new PVector(pos.x, pos.y));
+  }
+  
+  boolean hitTail() {
+    for (int i = 0; i < body.size() - 1; i++) {
+      if (pos.x == body.get(i).x && pos.y == body.get(i).y) {
+        return true; //<>//
+      }
+    }
+    
+    return false;
+  }
+}
