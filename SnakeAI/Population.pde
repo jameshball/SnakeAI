@@ -21,25 +21,18 @@ class Population {
   
   void show() {
     showBestPlayers();
-    for (int i = 0; i < players.length; i++) {
-      players[i].level.frog.checkMovement();
-    }
   }
   
   void update() {
     for (int i = 0; i < players.length; i++) {
       players[i].update();
-      
-      for (int j = 0; j < players[i].level.cars.length; j++) {
-        players[i].level.cars[j].update();
-      }
     }
     
   }
   
   boolean isAllDead() {
     for (int i = 0; i < players.length; i++) {
-      if (!players[i].level.frog.dead) {
+      if (!players[i].level.snake.dead) {
         return false;
       }
     }
@@ -59,11 +52,11 @@ class Population {
       nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights());
     }
     
-    float maxScore = players[0].level.fitness;
+    float maxScore = players[0].level.score;
     
     for (int i = 1; i < players.length; i++) {
-      if (players[i].level.fitness > maxScore) {
-        maxScore = players[i].level.fitness;
+      if (players[i].level.score > maxScore) {
+        maxScore = players[i].level.score;
       }
     }
     
@@ -101,7 +94,7 @@ class Population {
     float sum = 0;
     
     for (int i = 0; i < players.length; i++) {
-      sum += Math.pow(players[i].level.fitness, 2);
+      sum += players[i].level.fitness;
     }
     
     return sum;
@@ -111,7 +104,7 @@ class Population {
     float sum = 0;
     
     for (int i = 0; i < players.length; i++) {
-      sum += players[i].level.fitness;
+      sum += players[i].level.score;
     }
     
     return sum;
@@ -126,7 +119,7 @@ class Population {
     float runningSum = 0;
     
     for (int i = 0; i < players.length; i++) {
-      runningSum += Math.pow(players[i].level.fitness, 2);
+      runningSum += players[i].level.fitness;
       
       if (runningSum > randomNum) {
         return players[i].nn;
@@ -154,22 +147,12 @@ class Population {
     int sum = 0;
     
     for (int i = 0; i < players.length; i++) {
-      if (players[i].level.frog.dead) {
+      if (players[i].level.snake.dead) {
         sum++;
       }
     }
     
     return sum;
-  }
-  
-  void drawLines() {
-    for (int i = 0; i < gridX + 1; i++) {
-      line(i * squareWidth, 0, i * squareHeight, gridY * squareHeight);
-    }
-    
-    for (int i = 0; i < gridY + 1; i++) {
-      line(0, i * squareHeight, gridX * squareWidth, i * squareHeight);
-    }
   }
   
   void showBestPlayers() {
@@ -185,11 +168,11 @@ class Population {
             float fitness1 = p1.level.fitness;
             float fitness2 = p2.level.fitness;
             
-            if (p1.level.frog.dead) {
+            if (p1.level.snake.dead) {
               fitness1 = -1;
             }
             
-            if (p2.level.frog.dead) {
+            if (p2.level.snake.dead) {
               fitness2 = -1;
             }
             

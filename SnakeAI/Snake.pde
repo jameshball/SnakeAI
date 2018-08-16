@@ -3,9 +3,13 @@ class Snake {
   ArrayList<PVector> body = new ArrayList<PVector>();
   int direction;
   boolean dead = false;
+  int gridX;
+  int gridY;
   
-  Snake(int gridX, int gridY) {
-    pos = new PVector((int)random(1, gridX), (int)random(1, gridY));
+  Snake(int iGridX, int iGridY) {
+    gridX = iGridX;
+    gridY = iGridY;
+    pos = new PVector((int)random(1, gridX - 1), (int)random(1, gridY - 1));
     body.add(new PVector(pos.x, pos.y));
     direction = -1;
   }
@@ -44,10 +48,18 @@ class Snake {
   boolean hitTail() {
     for (int i = 0; i < body.size() - 1; i++) {
       if (pos.x == body.get(i).x && pos.y == body.get(i).y) {
-        return true; //<>//
+        return true;
       }
     }
     
     return false;
+  }
+  
+  boolean withinBounds() {
+    if (pos.x > gridX - 1 || pos.x < 0 || pos.y > gridY - 1 || pos.y < 0) {
+      return false;
+    }
+    
+    return true;
   }
 }

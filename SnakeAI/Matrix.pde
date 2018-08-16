@@ -1,7 +1,7 @@
 class Matrix {
   int rows;
   int cols;
-  float mutationRate = 0.01;
+  float mutationRate = 0.02;
   
   float[][] data;
   

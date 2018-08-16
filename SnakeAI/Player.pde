@@ -3,19 +3,16 @@ class Player {
   Level level;
   PVector startPos;
   PVector startAngle;
-  int moveTimer;
   float[] input = new float[0];
   
   Player(int[] lengthArr) {
     nn = new NeuralNetwork(lengthArr);
-    level = new Level();
-    moveTimer = frameCount;
+    level = new Level(20, 20);
   }
   
   Player(NeuralNetwork nnInput) {
     nn = nnInput;
-    level = new Level();
-    moveTimer = frameCount;
+    level = new Level(20, 20);
   }
   
   void show() {
@@ -23,18 +20,8 @@ class Player {
   }
   
   void update() {
-    if (!level.frog.dead && frameCount - moveTimer >= 50) {
-      int fLane = level.frog.lane;
-      Car carAbove = level.getCar(fLane - 1);
-      Car carAbove2 = level.getCar(fLane - 2);
-      Car carBelow = level.getCar(fLane + 1);
-      Car carOnLane = level.getCar(fLane);
-      
-      
-      
-      //input = new float[] { level.frog.loc - (carAbove.loc - 1), level.frog.loc - (carAbove.loc + carAbove.sizeX) };
-      //there is a saved NN for this => input = new float[] { level.frog.loc - (carAbove.loc - 1), level.frog.loc - (carAbove.loc + carAbove.sizeX), level.frog.loc - (carOnLane.loc - 1), level.frog.loc - (carOnLane.loc + carOnLane.sizeX) };
-      input = new float[] { level.frog.loc - (carBelow.loc - 1), level.frog.loc - (carBelow.loc + carBelow.sizeX), carBelow.getDirNum(), level.frog.loc - (carAbove2.loc - 1), level.frog.loc - (carAbove2.loc + carAbove2.sizeX), carAbove2.getDirNum(), level.frog.loc - (carAbove.loc - 1), level.frog.loc - (carAbove.loc + carAbove.sizeX), carAbove.getDirNum(), level.frog.loc - (carOnLane.loc - 1), level.frog.loc - (carOnLane.loc + carOnLane.sizeX), carOnLane.getDirNum() };
+    if (!level.snake.dead) {
+      input = level.vision();
       
       float[] output = nn.feedForward(input).toArray();
       
@@ -48,13 +35,9 @@ class Player {
         }
       }
       
-      if (max > 0.5) {
-        level.frog.frogMove(maxIndex);
-      }
-      
-      moveTimer = frameCount;
+      level.snake.direction = maxIndex;
     }
     
-    level.update();
+    level.frameRateUpdate();
   }
 }
