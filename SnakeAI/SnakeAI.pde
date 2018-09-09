@@ -9,6 +9,7 @@ boolean hideVision = false;
 boolean lowerFramerate = false;
 int popSize = 500;
 Population pop;
+boolean won = false;
 
 Level level = new Level(20, 20);
 
@@ -50,10 +51,19 @@ void draw() {
   }
   
   fill(0);
-  text("Framerate: " + frameRate, 180, 420);
-  text("Frames: " + frameCount, 180, 450);
-  text("No. dead: " + pop.getNumberDead(), 20, 420);
-  text("Plrs rndrd: " + playersRendered, 20, 450);
+  text("Players rendered: " + playersRendered, 20, 420);
+  text("Number dead: " + pop.getNumberDead(), 20, 450);
+  text("Framerate: " + frameRate, 20, 480);
+  text("Frames: " + frameCount, 20, 510);
+  text("Score of best: " + pop.players[0].level.score, 20, 540);
+  
+  if (pop.players[0].level.score >= 399) {
+    won = true;
+  }
+  
+  if (won) {
+    text("Won!!", 20, 600);
+  }
   
   if (playersRendered < 0) {
     playersRendered = 0;
