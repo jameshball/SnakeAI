@@ -1,4 +1,9 @@
 package com.company;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 class Population {
   Player[] players;
   float currentMax = 0;
@@ -7,16 +12,14 @@ class Population {
   
   Population (int pSize, int[] lengthArr) {
     players = new Player[pSize];
-    
+
     for (int i = 0; i < pSize; i++) {
       players[i] = new Player(lengthArr);
     }
   }
 
   void update() {
-    for (int i = 0; i < players.length; i++) {
-      players[i].update();
-    }
+    Arrays.stream(players).parallel().forEach(p -> p.update());
   }
   
   boolean isAllDead() {
@@ -32,7 +35,9 @@ class Population {
   void naturalSelection() {
     Player[] nextGen = new Player[players.length];
 
-    for (int i = 0; i < players.length; i++) {
+    nextGen[players.length - 1] = new Player(players[getBest()].nn);
+
+    for (int i = 0; i < players.length - 1; i++) {
       nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights());
     }
     
