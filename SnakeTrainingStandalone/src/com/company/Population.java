@@ -125,26 +125,8 @@ class Population {
     
     return maxIndex;
   }
-  
-  int getNumberDead() {
-    int sum = 0;
-    
-    for (int i = 0; i < players.length; i++) {
-      if (players[i].level.snake.dead) {
-        sum++;
-      }
-    }
-    
-    return sum;
-  }
 
   void saveBestPlayer() {
-    players[getBest()].nn.save("/data/nn.json");
-  }
-  
-  void replaceAllNN(String filePath) {
-    for (int i = 0; i < players.length; i++) {
-      players[i].nn.load(filePath);
-    }
+    players[getBest()].nn.save("C:\\dev\\SnakeAI\\SnakeTrainingStandalone\\data\\nn.json");
   }
 }
