@@ -11,8 +11,6 @@ int popSize = 500;
 Population pop;
 boolean won = false;
 
-Level level = new Level(20, 20);
-
 void setup() {
   size(1700, 800, P2D);
   frameRate(1000);

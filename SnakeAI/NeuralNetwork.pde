@@ -1,7 +1,7 @@
 class NeuralNetwork {
-  int[] lengths;
+  private int[] lengths;
   
-  Matrix[] weightMatrices;
+  private Matrix[] weightMatrices;
   
   NeuralNetwork (int[] inputLengths) {
     lengths = inputLengths;
@@ -9,9 +9,9 @@ class NeuralNetwork {
     initializeMatrices(lengths.length - 1);
   }
   
-  NeuralNetwork (int[] arrLengths, Matrix[] inputWeightMatrices) {
-    lengths = arrLengths;
-    weightMatrices = inputWeightMatrices;
+  NeuralNetwork (int[] lengths, Matrix[] weightMatrices) {
+    this.lengths = lengths;
+    this.weightMatrices = weightMatrices;
   }
   
   NeuralNetwork(String filePath) {

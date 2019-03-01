@@ -35,6 +35,8 @@ class Population {
   void naturalSelection() {
     Player[] nextGen = new Player[players.length];
 
+    saveBestPlayer();
+
     nextGen[players.length - 1] = new Player(players[getBest()].nn);
 
     for (int i = 0; i < players.length - 1; i++) {

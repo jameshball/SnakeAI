@@ -8,7 +8,6 @@ class Level {
   int fitness;
   boolean isBest = false;
   int movesOfLastApple;
-  int framesPerMove = 0;
   int moveTimer;
   int moves = 0;
   

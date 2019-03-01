@@ -1,8 +1,6 @@
 class Player {
   NeuralNetwork nn;
   Level level;
-  PVector startPos;
-  PVector startAngle;
   float[] input = new float[0];
   
   Player(int[] lengthArr) {
@@ -10,8 +8,8 @@ class Player {
     level = new Level(20, 20);
   }
   
-  Player(NeuralNetwork nnInput) {
-    nn = nnInput;
+  Player(NeuralNetwork nn) {
+    this.nn = nn;
     level = new Level(20, 20);
   }
   

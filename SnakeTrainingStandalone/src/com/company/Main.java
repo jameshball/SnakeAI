@@ -13,18 +13,9 @@ public class Main {
             pop.update();
 
             if (pop.isAllDead()) {
-
                 pop.naturalSelection();
                 System.out.println("Gen: " + gen + '\t' + "Max: " + pop.currentMax + '\t' + "Avg: " + pop.currentAvg);
                 gen++;
-
-                if (System.in.available() > 0) {
-                    char keyChar = (char)System.in.read();
-
-                    if (keyChar == 's') {
-                        pop.saveBestPlayer();
-                    }
-                }
             }
         }
     }
