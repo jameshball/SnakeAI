@@ -38,10 +38,10 @@ class NeuralNetwork {
     if (input.rows == layers[0].rows) {
       layers[0] = input.addBias();
       for (int i = 1; i < layers.length - 1; i++) {
-        layers[i] = weightMatrices[i - 1].multiply(layers[i - 1]).applySigmoid().addBias();
+        layers[i] = weightMatrices[i - 1].multiply(layers[i - 1]).applyReLu().addBias();
       }
       
-      layers[layers.length - 1] = weightMatrices[weightMatrices.length - 1].multiply(layers[layers.length - 2]).applySigmoid();
+      layers[layers.length - 1] = weightMatrices[weightMatrices.length - 1].multiply(layers[layers.length - 2]).applyReLu();
       
       return layers[layers.length - 1];
     }

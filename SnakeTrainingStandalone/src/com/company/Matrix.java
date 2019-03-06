@@ -95,18 +95,17 @@ class Matrix {
     
     return r;
   }
-  
-  Matrix applySigmoid() {
-    Matrix m = new Matrix(rows, cols);
-    
+
+  Matrix applyReLu() {
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
-        float x = data[i][j];
-        m.data[i][j] = (float)Math.exp(x) / (float)(Math.exp(x) + 1.0);
+        if (data[i][j] < 0) {
+          data[i][j] = 0;
+        }
       }
     }
-    
-    return m;
+
+    return this;
   }
   
   float[] toArray() {

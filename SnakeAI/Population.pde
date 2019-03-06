@@ -1,6 +1,5 @@
 class Population {
   Player[] players;
-  int framesSinceLastGen = 0;
   int bestIndex = -1;
   int framesSinceLastSort = 0;
   Graph maxFitnessGraph;
@@ -14,7 +13,6 @@ class Population {
       players[i] = new Player(lengthArr);
     }
     
-    framesSinceLastGen = frameCount;
     framesSinceLastSort = frameCount;
     nnGraph = new NNGraph(players[0].nn, 700, 800, 10, 10);
   }
@@ -63,7 +61,6 @@ class Population {
     avgFitnessGraph.addData(new Datapoint(scoreSum() / players.length, false));
     
     players = nextGen;
-    framesSinceLastGen = frameCount;
   }
   
   NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
