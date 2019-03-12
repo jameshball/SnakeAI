@@ -1,7 +1,7 @@
 import java.util.*;
 
-int snakeWidth = 400;
-int snakeHeight = 400;
+int snakeWidth = 600;
+int snakeHeight = 600;
 int playersRendered = 10;
 int gen = 0;
 boolean hideGraphs = false;
@@ -12,12 +12,12 @@ Population pop;
 boolean won = false;
 
 void setup() {
-  size(1700, 800, P2D);
+  size(1920, 1080, P2D);
   frameRate(1000);
   
   pop = new Population(popSize, new int[] { 24, 16, 4 });
-  pop.maxFitnessGraph = new Graph(500, 50, "Generation", "Max. Fitness" , 670, 275, 4, new int[] { 0, 0, 0 });
-  pop.avgFitnessGraph = new Graph(500, 450, "Generation", "Avg. Fitness" , 670, 275, 4, new int[] { 255, 0, 0 });
+  pop.maxFitnessGraph = new Graph(700, 50, "Generation", "Max. Fitness" , 700, 350, 4, new int[] { 0, 0, 0 });
+  pop.avgFitnessGraph = new Graph(700, 550, "Generation", "Avg. Fitness" , 700, 350, 4, new int[] { 255, 0, 0 });
 }
 
 void draw() {
@@ -33,10 +33,10 @@ void draw() {
   if (!hideGraphs) {
     pop.maxFitnessGraph.show();
     pop.avgFitnessGraph.show();
-    pop.nnGraph.show(1200, 0);
+    pop.nnGraph.show(1430, 20);
   }
   
-  textSize(20);
+  textSize(26);
   
   if (pop.avgFitnessGraph.size() > 0) {
     if (pop.avgFitnessGraph.size() > 1 && pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 2).data < pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data) {
@@ -45,22 +45,22 @@ void draw() {
     else {
       fill(255, 0, 0);
     }
-    text("Avg fitness: " + pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data, 550, 20);
+    text("Avg fitness: " + pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data, 750, 20);
   }
   
   fill(0);
-  text("Players rendered: " + playersRendered, 20, 420);
-  text("Number dead: " + pop.getNumberDead(), 20, 450);
-  text("Framerate: " + frameRate, 20, 480);
-  text("Frames: " + frameCount, 20, 510);
-  text("Score of best: " + pop.players[0].level.score, 20, 540);
+  text("Players rendered: " + playersRendered, 20, 640);
+  text("Number dead: " + pop.getNumberDead(), 20, 680);
+  text("Framerate: " + frameRate, 20, 720);
+  text("Frames: " + frameCount, 20, 760);
+  text("Score of best: " + pop.players[0].level.score, 20, 800);
   
   if (pop.players[0].level.score >= 399) {
     won = true;
   }
   
   if (won) {
-    text("Won!!", 20, 600);
+    text("Won!!", 20, 870);
   }
   
   if (playersRendered < 0) {

@@ -16,6 +16,7 @@ class Level {
   boolean isBest = false;
   int movesOfLastApple;
   int moves = 0;
+  int allowedMoves = 300;
   
   Level (int x, int y) {
     gridX = x;
@@ -43,6 +44,7 @@ class Level {
               resetApple();
               score++;
               movesOfLastApple = moves;
+              allowedMoves = (int)(200 * (Math.log(snake.body.size()) / Math.log(3)) + 300);
           }
           else {
               snake.move();
@@ -58,8 +60,6 @@ class Level {
   }
   
   void checkDead() {
-    int allowedMoves = (int)(500 * (Math.log(snake.body.size()) / Math.log(2)) + 500);
-    
     if (!snake.withinBounds() || snake.hitTail() || moves - movesOfLastApple > allowedMoves) {
       snake.dead = true;
       calculateFitness();
@@ -99,7 +99,8 @@ class Level {
     
     return true;
   }
-  
+
+
   List<Float> snakeLook(PVector dir) {
     PVector snakePos = new PVector(snake.pos.x, snake.pos.y);
     Float[] vision = new Float[3];
@@ -129,7 +130,7 @@ class Level {
     
     return Arrays.asList(vision); //<>//
   }
-  
+
   float[] vision() {
     ArrayList<Float> vision = new ArrayList<Float>();
     

@@ -18,27 +18,17 @@ class NeuralNetwork {
     load(filePath);
   }
   
-  Matrix feedForward(float[] arr) {
-    Matrix input = new Matrix(arr);
+  float[] feedForward(float[] arr) {
+    Matrix currentLayer = new Matrix(arr).addBias();
     
-    Matrix[] layers = new Matrix[lengths.length];
-    
-    for (int i = 0; i < layers.length; i++) {
-      layers[i] = new Matrix(lengths[i], 1);
-    }
-    
-    if (input.rows == layers[0].rows) {
-      layers[0] = input.addBias();
-      for (int i = 1; i < layers.length - 1; i++) {
-        layers[i] = weightMatrices[i - 1].multiply(layers[i - 1]).applyReLu().addBias();
+    for (int i = 0; i < weightMatrices.length; i++) {
+      currentLayer = weightMatrices[i].multiply(currentLayer).applyReLu();
+      if (i < weightMatrices.length - 1) {
+        currentLayer = currentLayer.addBias();
       }
-      
-      layers[layers.length - 1] = weightMatrices[weightMatrices.length - 1].multiply(layers[layers.length - 2]).applyReLu();
-      
-      return layers[layers.length - 1];
     }
     
-    return null;
+    return currentLayer.toArray();
   }
   
   NeuralNetwork mutateWeights() {

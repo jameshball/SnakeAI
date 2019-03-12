@@ -21,7 +21,7 @@ class Player {
     if (!level.snake.dead) {
       input = level.vision();
       
-      float[] output = nn.feedForward(input).toArray();
+      float[] output = nn.feedForward(input);
       
       float max = output[0];
       int maxIndex = 0;

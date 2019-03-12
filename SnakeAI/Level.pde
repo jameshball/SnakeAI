@@ -8,6 +8,7 @@ class Level {
   int fitness;
   boolean isBest = false;
   int movesOfLastApple;
+  int allowedMoves = 300;
   int moveTimer;
   int moves = 0;
   
@@ -78,26 +79,27 @@ class Level {
   }
   
   void update() {
-    snake.update();
-    if (snake.pos.x == apple.pos.x && snake.pos.y == apple.pos.y) {
-      snake.extend();
-      apple = new Apple(gridX, gridY);
-      score++;
-      movesOfLastApple = moves;
-    }
-    else {
-      snake.move();
-    }
-    
-    checkDead();
     if (!snake.dead) {
-      updateGrid();
+      snake.update();
+      if (snake.pos.x == apple.pos.x && snake.pos.y == apple.pos.y) {
+        snake.extend();
+        apple = new Apple(gridX, gridY);
+        score++;
+        movesOfLastApple = moves;
+        allowedMoves = (int)(200 * (Math.log(snake.body.size()) / Math.log(3)) + 300);
+      }
+      else {
+        snake.move();
+      }
+      
+      checkDead();
+      if (!snake.dead) {
+        updateGrid();
+      }
     }
   }
   
   void checkDead() {
-    int allowedMoves = (int)(500 * (Math.log(snake.body.size()) / Math.log(2)) + 500);
-    
     if (!snake.withinBounds() || snake.hitTail() || moves - movesOfLastApple > allowedMoves) {
       snake.dead = true;
       calculateFitness();

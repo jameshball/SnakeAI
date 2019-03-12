@@ -110,7 +110,7 @@ class Graph {
       smooth();
       
       
-      textSize(14);
+      textSize(18);
       fill(0);
       
       text(xlabel, posx + 10 - textWidth(xlabel) / 2 + graphWidth / 2, posy + graphHeight + 50);
@@ -147,12 +147,12 @@ class Graph {
         if (heightShowingRate == 0) {
           for (float i = 0; i < valueRange + 0.2; i = i + 0.2) {
             i = Precision.round(i, 2);
-            text(min + i, posx - 40, posy + graphHeight - i*lineHeight + 5);
+            text(min + i, posx - 48, posy + graphHeight - i*lineHeight + 5);
           }
         }
         else {
           for (float i = 0; i < valueRange + 0.2; i += heightShowingRate) {
-            text(min + i, posx - 40, posy + graphHeight - i*lineHeight + 5);
+            text(min + i, posx - 48, posy + graphHeight - i*lineHeight + 5);
           }
         }
       }
@@ -172,7 +172,7 @@ class Graph {
       if (widthShowingRate == 0) {
         for (int i = 0; i < tData[0].size(); i++) {
           String text = Integer.toString((int)(gen - tData[0].size() + i));
-          text(text, i*lineWidth + posx + 10 - textWidth(text) / 2, posy + graphHeight + 20);
+          text(text, i*lineWidth + posx + 10 - textWidth(text) / 2, posy + graphHeight + 25);
         }
       }
       else {

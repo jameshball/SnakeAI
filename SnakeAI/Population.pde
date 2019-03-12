@@ -1,7 +1,7 @@
 class Population {
   Player[] players;
   int bestIndex = -1;
-  int framesSinceLastSort = 0;
+  int framesSinceLastSort;
   Graph maxFitnessGraph;
   Graph avgFitnessGraph;
   NNGraph nnGraph;
@@ -14,7 +14,7 @@ class Population {
     }
     
     framesSinceLastSort = frameCount;
-    nnGraph = new NNGraph(players[0].nn, 700, 800, 10, 10);
+    nnGraph = new NNGraph(players[0].nn, 700, 950, 10, 10);
   }
   
   void show() {
@@ -193,6 +193,7 @@ class Population {
     }
     
   }
+  
   
   void saveBestPlayer() {
     players[getBest()].nn.save("/data/nn.json");
