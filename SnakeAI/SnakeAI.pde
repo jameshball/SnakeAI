@@ -13,11 +13,12 @@ boolean won = false;
 
 void setup() {
   size(1920, 1080, P2D);
-  frameRate(60);
+  frameRate(1000);
   
-  pop = new Population(popSize, new int[] { 24, 16, 4 });
+  pop = new Population();
   pop.maxFitnessGraph = new Graph(700, 50, "Generation", "Max. Fitness" , 700, 350, 4, new int[] { 0, 0, 0 });
   pop.avgFitnessGraph = new Graph(700, 550, "Generation", "Avg. Fitness" , 700, 350, 4, new int[] { 255, 0, 0 });
+  pop.loadProgram("/data/program.json");
 }
 
 void draw() {
@@ -81,12 +82,6 @@ void keyPressed() {
       break;
     case '-':
       playersRendered--;
-      break;
-    case 's':
-      pop.saveBestPlayer();
-      break;
-    case 'l':
-      pop.replaceAllNN("/data/nn.json");
       break;
     case 'f':
       lowerFramerate = toggle(lowerFramerate);

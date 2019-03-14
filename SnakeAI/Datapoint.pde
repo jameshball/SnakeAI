@@ -13,4 +13,10 @@ class Datapoint {
     isEmpty = empty;
     data = 0.0;
   }
+  
+  Datapoint(JSONObject datapoint) {
+    data = datapoint.getFloat("data");
+    isInteger = datapoint.getBoolean("isInteger");
+    isEmpty = datapoint.getBoolean("isEmpty");
+  }
 }

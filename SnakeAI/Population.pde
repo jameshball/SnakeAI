@@ -17,6 +17,14 @@ class Population {
     nnGraph = new NNGraph(players[0].nn, 700, 950, 10, 10);
   }
   
+  Population() {
+    players = new Player[1];
+    players[0] = new Player(new int[] { 1, 1});
+    
+    framesSinceLastSort = frameCount;
+    nnGraph = new NNGraph(players[0].nn, 700, 950, 10, 10);
+  }
+  
   void show() {
     showBestPlayers();
   }
@@ -61,6 +69,8 @@ class Population {
     avgFitnessGraph.addData(new Datapoint(scoreSum() / players.length, false));
     
     players = nextGen;
+    
+    saveProgram();
   }
   
   NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
@@ -158,25 +168,7 @@ class Population {
       }
       
       if (frameCount - framesSinceLastSort > 200) {
-        Arrays.sort(players, new Comparator<Player>() {
-          @Override
-          public int compare(Player p1, Player p2) {
-            float fitness1 = p1.level.fitness;
-            float fitness2 = p2.level.fitness;
-            
-            if (p1.level.snake.dead) {
-              fitness1 = -1;
-            }
-            
-            if (p2.level.snake.dead) {
-              fitness2 = -1;
-            }
-            
-            return Float.compare(fitness1, fitness2);
-          }
-        });
-        
-        Collections.reverse(Arrays.asList(players));
+        sortPlayers();
         
         framesSinceLastSort = frameCount;
       }
@@ -194,14 +186,95 @@ class Population {
     
   }
   
-  
-  void saveBestPlayer() {
-    players[getBest()].nn.save("/data/nn.json");
+  void sortPlayers() {
+    Arrays.sort(players, new Comparator<Player>() {
+      @Override
+      public int compare(Player p1, Player p2) {
+        float fitness1 = p1.level.fitness;
+        float fitness2 = p2.level.fitness;
+        
+        if (p1.level.snake.dead) {
+          fitness1 = -1;
+        }
+        
+        if (p2.level.snake.dead) {
+          fitness2 = -1;
+        }
+        
+        return Float.compare(fitness1, fitness2);
+      }
+    });
+    
+    Collections.reverse(Arrays.asList(players));
   }
   
-  void replaceAllNN(String filePath) {
+  void saveProgram() {
+    sortPlayers();
+    
+    JSONObject program = new JSONObject();
+    JSONArray neuralNetworks = new JSONArray();
+    JSONArray maxFitnessData = new JSONArray();
+    JSONArray avgFitnessData = new JSONArray();
+    
+    program.setInt("gen", gen);
+    
     for (int i = 0; i < players.length; i++) {
-      players[i].nn.load(filePath);
+      neuralNetworks.setJSONObject(i, players[i].nn.save());
+    }
+    
+    for (int i = 0; i < maxFitnessGraph.data[0].size(); i++) {
+      JSONObject datapoint = new JSONObject();
+      
+      datapoint.setFloat("data", maxFitnessGraph.data[0].get(i).data);
+      datapoint.setBoolean("isInteger", maxFitnessGraph.data[0].get(i).isInteger);
+      datapoint.setBoolean("isEmpty", maxFitnessGraph.data[0].get(i).isEmpty);
+      
+      maxFitnessData.setJSONObject(i, datapoint);
+    }
+    
+    for (int i = 0; i < avgFitnessGraph.data[0].size(); i++) {
+      JSONObject datapoint = new JSONObject();
+      
+      datapoint.setFloat("data", avgFitnessGraph.data[0].get(i).data);
+      datapoint.setBoolean("isInteger", avgFitnessGraph.data[0].get(i).isInteger);
+      datapoint.setBoolean("isEmpty", avgFitnessGraph.data[0].get(i).isEmpty);
+      
+      avgFitnessData.setJSONObject(i, datapoint);
+    }
+    
+    program.setJSONArray("neuralNetworks", neuralNetworks);
+    program.setJSONArray("maxFitnessData", maxFitnessData);
+    program.setJSONArray("avgFitnessData", avgFitnessData);
+    
+    saveJSONObject(program, "/data/program.json");
+  }
+  
+  void loadProgram(String path) {
+    JSONObject program = loadJSONObject(path);
+    JSONArray neuralNetworks = program.getJSONArray("neuralNetworks");
+    JSONArray maxFitnessData = program.getJSONArray("maxFitnessData");
+    JSONArray avgFitnessData = program.getJSONArray("avgFitnessData");
+    
+    gen = program.getInt("gen");
+    
+    if (neuralNetworks.size() == popSize) {
+      players = new Player[popSize];
+      
+      for (int i = 0; i < popSize; i++) {
+        players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)));
+      }
+    }
+    
+    maxFitnessGraph.data[0] = new ArrayList<Datapoint>();
+    
+    for (int i = 0; i < maxFitnessData.size(); i++) {
+      maxFitnessGraph.data[0].add(new Datapoint(maxFitnessData.getJSONObject(i)));
+    }
+    
+    avgFitnessGraph.data[0] = new ArrayList<Datapoint>();
+    
+    for (int i = 0; i < avgFitnessData.size(); i++) {
+      avgFitnessGraph.data[0].add(new Datapoint(avgFitnessData.getJSONObject(i)));
     }
   }
 }

@@ -14,8 +14,8 @@ class NeuralNetwork {
     this.weightMatrices = weightMatrices;
   }
   
-  NeuralNetwork(String filePath) {
-    load(filePath);
+  NeuralNetwork(JSONObject neuralNet) {
+    load(neuralNet);
   }
   
   float[] feedForward(float[] arr) {
@@ -51,7 +51,7 @@ class NeuralNetwork {
     return true;
   }
   
-  void save(String filePath) {
+  JSONObject save() {
     JSONObject neuralNet = new JSONObject();
     
     neuralNet.setInt("layerCount", lengths.length);
@@ -77,12 +77,10 @@ class NeuralNetwork {
       neuralNet.setJSONObject("weightMatrix " + Integer.toString(i), matrix);
     }
     
-    saveJSONObject(neuralNet, filePath);
+    return neuralNet;
   }
   
-  void load(String filePath) {
-    JSONObject neuralNet = loadJSONObject(filePath);
-    
+  void load(JSONObject neuralNet) {
     lengths = new int[neuralNet.getInt("layerCount")];
     
     for (int i = 0; i < lengths.length; i++) {
