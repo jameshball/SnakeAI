@@ -13,7 +13,7 @@ boolean won = false;
 
 void setup() {
   size(1920, 1080, P2D);
-  frameRate(1000);
+  frameRate(60);
   
   pop = new Population(popSize, new int[] { 24, 16, 4 });
   pop.maxFitnessGraph = new Graph(700, 50, "Generation", "Max. Fitness" , 700, 350, 4, new int[] { 0, 0, 0 });
@@ -45,7 +45,7 @@ void draw() {
     else {
       fill(255, 0, 0);
     }
-    text("Avg fitness: " + pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data, 750, 20);
+    text("Avg fitness: " + pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data, 750, 30);
   }
   
   fill(0);
