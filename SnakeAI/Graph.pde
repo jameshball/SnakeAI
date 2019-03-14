@@ -110,7 +110,7 @@ class Graph {
       smooth();
       
       
-      textSize(18);
+      textFont(graph);
       fill(0);
       
       text(xlabel, posx + 10 - textWidth(xlabel) / 2 + graphWidth / 2, posy + graphHeight + 50);

@@ -10,10 +10,15 @@ boolean lowerFramerate = false;
 int popSize = 500;
 Population pop;
 boolean won = false;
+PFont graph;
+PFont text;
 
 void setup() {
   size(1920, 1080, P2D);
   frameRate(1000);
+  
+  graph = createFont("/data/Roboto-Regular.ttf", 18, true);
+  text = createFont("/data/Roboto-Regular.ttf", 26, true);
   
   pop = new Population();
   pop.maxFitnessGraph = new Graph(700, 50, "Generation", "Max. Fitness" , 700, 350, 4, new int[] { 0, 0, 0 });
@@ -37,8 +42,7 @@ void draw() {
     pop.nnGraph.show(1430, 20);
   }
   
-  textSize(26);
-  
+  textFont(text);
   if (pop.avgFitnessGraph.size() > 0) {
     if (pop.avgFitnessGraph.size() > 1 && pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 2).data < pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data) {
       fill(0, 255, 0);
