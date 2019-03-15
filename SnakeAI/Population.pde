@@ -217,6 +217,7 @@ class Population {
     JSONArray avgFitnessData = new JSONArray();
     
     program.setInt("gen", gen);
+    program.setInt("start", start);
     
     for (int i = 0; i < players.length; i++) {
       neuralNetworks.setJSONObject(i, players[i].nn.save());
@@ -256,6 +257,7 @@ class Population {
     JSONArray avgFitnessData = program.getJSONArray("avgFitnessData");
     
     gen = program.getInt("gen");
+    start = program.getInt("start");
     
     if (neuralNetworks.size() == popSize) {
       players = new Player[popSize];

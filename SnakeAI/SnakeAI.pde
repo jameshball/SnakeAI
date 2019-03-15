@@ -13,11 +13,14 @@ boolean won = false;
 PFont graph;
 PFont text;
 PFont bold;
+int start;
 
 void setup() {
   size(1920, 1080, FX2D);
-  frameRate(144);
+  frameRate(10000);
   smooth();
+  
+  start = millis();
   
   graph = createFont("/data/Roboto-Regular.ttf", 18, true);
   text = createFont("/data/Roboto-Regular.ttf", 26, true);
@@ -57,12 +60,18 @@ void draw() {
     text("Avg fitness: " + pop.avgFitnessGraph.get(pop.avgFitnessGraph.size() - 1).data, 20, 640);
   }
   
+  int timer = millis() - start;
+  
+  int seconds = (int) (timer / 1000) % 60 ;
+  int minutes = (int) ((timer / (1000*60)) % 60);
+  int hours   = (int) ((timer / (1000*60*60)) % 24);
+  
   textFont(text);
   fill(0);
   text("Players rendered: " + playersRendered, 20, 680);
   text("Number dead: " + pop.getNumberDead(), 20, 720);
   text("Framerate: " + frameRate, 20, 760);
-  text("Frames: " + frameCount, 20, 800);
+  text("Time since start: " + String.format("%02d", hours) + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds), 20, 800);
   text("Score of best: " + pop.players[0].level.score, 20, 840);
   
   if (pop.players[0].level.score >= 399) {
