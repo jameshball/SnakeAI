@@ -29,6 +29,11 @@ class Level {
   }
   
   void show() {
+    noStroke();
+    
+    int rectWidth = snakeWidth / gridX;
+    int rectHeight = snakeHeight / gridY;
+    
     for (int i = 0; i < gridX; i++) {
       for (int j = 0; j < gridY; j++) {
         if (isBest) {
@@ -54,12 +59,11 @@ class Level {
           }
         }
         
-        strokeWeight(0);
-        int rectWidth = snakeWidth / gridX;
-        int rectHeight = snakeHeight / gridY;
         rect(i * rectWidth, snakeHeight - ((j + 1) * rectHeight), rectWidth, rectHeight);
       }
     }
+    
+    stroke(1);
   }
   
   void frameRateUpdate() {

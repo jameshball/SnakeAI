@@ -33,6 +33,8 @@ class NNGraph {
       }
     }
     
+    strokeWeight(1.5);
+    
     for (int i = 0; i < nn.weightMatrices.length; i++) {
       for (int j = 0; j < nn.weightMatrices[i].rows; j++) {
         for (int k = 0; k < nn.weightMatrices[i].cols - 1; k++) {
