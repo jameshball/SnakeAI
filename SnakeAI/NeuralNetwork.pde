@@ -22,7 +22,7 @@ class NeuralNetwork {
     Matrix currentLayer = new Matrix(arr).addBias();
     
     for (int i = 0; i < weightMatrices.length; i++) {
-      currentLayer = weightMatrices[i].multiply(currentLayer).applyReLu();
+      currentLayer = weightMatrices[i].multiply(currentLayer).applySigmoid();
       if (i < weightMatrices.length - 1) {
         currentLayer = currentLayer.addBias();
       }

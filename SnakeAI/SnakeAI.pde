@@ -17,7 +17,7 @@ int start;
 
 void setup() {
   size(1920, 1080, FX2D);
-  frameRate(10000);
+  frameRate(144);
   smooth();
   
   start = millis();
