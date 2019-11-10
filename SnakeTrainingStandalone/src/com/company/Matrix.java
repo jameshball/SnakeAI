@@ -108,6 +108,20 @@ class Matrix {
 
     return this;
   }
+
+  /* Applies the ReLu function to all values in the matrix and returns it. */
+  Matrix applyReLu() {
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        /* This is a simple max(0, data[i][j]) function. */
+        if (data[i][j] < 0) {
+          data[i][j] = 0;
+        }
+      }
+    }
+
+    return this;
+  }
   
   float[] toArray() {
     float[] arr = new float[rows*cols];
