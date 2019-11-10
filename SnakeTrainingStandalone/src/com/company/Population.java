@@ -100,7 +100,7 @@ class Population {
     float total = 0;
 
     for (int i = 0; i < players.length; i++) {
-      total += players[i].level.score ^ 2;
+      total += Math.pow(players[i].level.score, 2);
     }
 
     return total;
@@ -124,7 +124,7 @@ class Population {
     float total = 0;
 
     for (int i = 0; i < players.length; i++) {
-      total += players[i].level.score ^ 2;
+      total += Math.pow(players[i].level.score, 2);
 
       if (total > threshold) {
         return players[i].nn;

@@ -7,8 +7,8 @@ import java.util.List;
 public class Main {
     static int[] networkStructure = new int[] { 24, 16, 4 };
     static int populationSize = 500;
-    static int gridX = 40;
-    static int gridY = 40;
+    static int gridX = 20;
+    static int gridY = 20;
     static float mutationRate = 0.02f;
     static List<Float> maxScore = new ArrayList<>();
     static List<Float> avgScore = new ArrayList<>();
