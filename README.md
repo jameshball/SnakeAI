@@ -7,11 +7,11 @@ This is the main program that will train the snakes, display graphs of their pro
 Hyper-parameters can be easily changed in SnakeAI.pde.
 
 It is coded in Processing (Java) and you will require the [Processing IDE](https://processing.org/download/) to open and run .pde files.
-### Features include:
-Displaying the average and max score of each generation in graphical form and the neural network of the best snake
+### Features include
+Displaying the average and max score of each generation in graphical form and the neural network of the best snake:
 ![Image of average score graph and best neural network](https://github.com/jameshball/SnakeAI/blob/master/graphs.png)
 
-Displaying a sample of current snakes (number of snakes shown can be changed by pressing + and - keys)
+Displaying a sample of current snakes (number of snakes shown can be changed by pressing + and - keys):
 ![Image of snakes](https://github.com/jameshball/SnakeAI/blob/master/snakes.png)
 
 And also displaying helpful statistics about the snakes, such as the average score of the last generation, the number of dead snakes, the time since start, the generation number etc.
