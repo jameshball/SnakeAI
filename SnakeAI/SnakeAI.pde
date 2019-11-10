@@ -19,7 +19,7 @@ int gen = 0;
 /* These are all hyper-parameters for the neural network and genetic algorithm. */
 int populationSize = 500;
 int[] networkStructure = new int[] { 24, 16, 4 };
-float mutationRate = 0.02;
+float mutationRate = 0.05;
 
 long start;
 
@@ -40,7 +40,7 @@ void setup() {
   maxScore = new Graph("Generation", "Max. score", color(0));
   avgScore = new Graph("Generation", "Avg. score", color(255, 0, 0));
   /* Loads the last-run program from a file. */
-  //pop.load("/data/program.json");
+  pop.load("/data/program.json");
 }
 
 /* The draw method is executed every frame. This is the main functionality of the program. */

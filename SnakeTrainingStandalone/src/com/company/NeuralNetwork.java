@@ -3,116 +3,97 @@ package com.company;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import static com.company.Main.networkStructure;
 
+/* This class is responsible for managing and creating neural networks for the Player class. */
 class NeuralNetwork {
-  int[] lengths;
-  
   Matrix[] weightMatrices;
-  
-  NeuralNetwork (int[] inputLengths) {
-    lengths = inputLengths;
-    
-    initializeMatrices(lengths.length - 1);
-  }
-  
-  NeuralNetwork (int[] arrLengths, Matrix[] inputWeightMatrices) {
-    lengths = arrLengths;
-    weightMatrices = inputWeightMatrices;
-  }
-  
-  NeuralNetwork(String filePath) {
-    load(filePath);
-  }
-  
-  Matrix feedForward(float[] arr) {
-    Matrix input = new Matrix(arr);
-    
-    Matrix[] layers = new Matrix[lengths.length];
-    
-    for (int i = 0; i < layers.length; i++) {
-      layers[i] = new Matrix(lengths[i], 1);
-    }
-    
-    if (input.rows == layers[0].rows) {
-      layers[0] = input.addBias();
-      for (int i = 1; i < layers.length - 1; i++) {
-        layers[i] = weightMatrices[i - 1].multiply(layers[i - 1]).applyReLu().addBias();
-      }
-      
-      layers[layers.length - 1] = weightMatrices[weightMatrices.length - 1].multiply(layers[layers.length - 2]).applySigmoid();
-      
-      return layers[layers.length - 1];
-    }
-    
-    return null;
-  }
-  
-  NeuralNetwork mutateWeights() {
-    NeuralNetwork mutated = new NeuralNetwork(lengths, weightMatrices);
-    
-    for (int i = 0; i < mutated.weightMatrices.length; i++) {
-      mutated.weightMatrices[i].mutate();
-    }
-    
-    return mutated;
-  }
-  
-  boolean dimensionsAreIdentical (NeuralNetwork nn2) {
-    for (int i = 0; i < lengths.length; i++) {
-      if (lengths[i] != nn2.lengths[i]) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-  
-  void save(String filePath) {
-    JSONObject neuralNet = new JSONObject();
-    
-    neuralNet.put("layerCount", lengths.length);
-    neuralNet.put("matrixCount", weightMatrices.length);
-    
-    for (int i = 0; i < lengths.length; i++) {
-      neuralNet.put("length " + Integer.toString(i), lengths[i]);
-    }
-    
+
+  NeuralNetwork() {
+    weightMatrices = new Matrix[networkStructure.length - 1];
+
+    /* Initialises n-1 weight matrices where n is the number of layers in the network. */
     for (int i = 0; i < weightMatrices.length; i++) {
-        JSONObject matrix = new JSONObject();
-      
-        for (int j = 0; j < weightMatrices[i].rows; j++) {
-            JSONArray row = new JSONArray();
-        
+      /* This initialises a weight matrix, considering the extra bias node. */
+      weightMatrices[i] = new Matrix(networkStructure[i + 1], networkStructure[i] + 1).randomize();
+    }
+  }
+
+  /* Loads a NeuralNetwork object from a JSONObject. */
+  NeuralNetwork(JSONObject neuralNet) {
+    /* Executes NeuralNetwork() constructor. */
+    this();
+
+    for (int i = 0; i < weightMatrices.length; i++) {
+      /* Fetches the specified weight matrix stored in this JSONObject. */
+      JSONObject matrix = neuralNet.getJSONObject("weightMatrix " + Integer.toString(i));
+
+      for (int j = 0; j < weightMatrices[i].rows; j++) {
+        /* Fetches the specified row stored in this JSONObject. */
+        JSONArray row = matrix.getJSONArray(Integer.toString(j));
+
         for (int k = 0; k < weightMatrices[i].cols; k++) {
-            row.put(k, weightMatrices[i].data[j][k]);
+          /* Sets the value of the weight to the weight retrieved from the JSONArray. */
+          weightMatrices[i].data[j][k] = row.getFloat(k);
         }
-        
-        matrix.put(Integer.toString(j), row);
-        }
-      
-        neuralNet.put("weightMatrix " + Integer.toString(i), matrix);
+      }
     }
-
-      try (PrintWriter out = new PrintWriter(filePath)) {
-          out.println(neuralNet.toString());
-      }
-      catch (FileNotFoundException e) {
-
-      }
   }
-  
-  void load(String filePath) {
-    //needs to be implemented;
+
+  /* Feeds an input array through the NN to return the output layer. */
+  float[] feedForward(float[] arr) throws IllegalArgumentException {
+    /* Checks to see the arr parameter is the correct length. */
+    if (networkStructure[0] == arr.length) {
+      Matrix currentLayer = new Matrix(arr);
+
+      /* Works through the NN and repeatedly calculates the next layer by multiplying the weight matrix
+         by the current layer and applying the activation function. */
+      for (int i = 0; i < weightMatrices.length; i++) {
+        currentLayer = weightMatrices[i].multiply(currentLayer.addBias()).applyReLu();
+      }
+
+      return currentLayer.toArray();
+    }
+    else {
+      throw new IllegalArgumentException();
+    }
   }
-  
-  void initializeMatrices(int arrLength) {
-    weightMatrices = new Matrix[arrLength];
-    
+
+  /* Mutates all weightMatrices and returns the NN object. */
+  NeuralNetwork mutateWeights() {
     for (int i = 0; i < weightMatrices.length; i++) {
-      //Considering the bias
-      weightMatrices[i] = new Matrix(lengths[i + 1], lengths[i] + 1).randomize();
+      weightMatrices[i].mutate();
     }
+
+    return this;
+  }
+
+  JSONObject save() {
+    JSONObject neuralNet = new JSONObject();
+
+    neuralNet.put("layerCount", networkStructure.length);
+    neuralNet.put("matrixCount", weightMatrices.length);
+
+    for (int i = 0; i < networkStructure.length; i++) {
+      neuralNet.put("length " + i, networkStructure[i]);
+    }
+
+    for (int i = 0; i < weightMatrices.length; i++) {
+      JSONObject matrix = new JSONObject();
+
+      for (int j = 0; j < weightMatrices[i].rows; j++) {
+        JSONArray row = new JSONArray();
+
+        for (int k = 0; k < weightMatrices[i].cols; k++) {
+          row.put(k, weightMatrices[i].data[j][k]);
+        }
+
+        matrix.put(Integer.toString(j), row);
+      }
+
+      neuralNet.put("weightMatrix " + i, matrix);
+    }
+
+    return neuralNet;
   }
 }

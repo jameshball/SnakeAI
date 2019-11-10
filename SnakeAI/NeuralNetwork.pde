@@ -12,10 +12,6 @@ class NeuralNetwork {
     }
   }
   
-  NeuralNetwork(Matrix[] weightMatrices) {
-    this.weightMatrices = weightMatrices;
-  }
-  
   /* Loads a NeuralNetwork object from a JSONObject. */
   NeuralNetwork(JSONObject neuralNet) {
     /* Executes NeuralNetwork() constructor. */

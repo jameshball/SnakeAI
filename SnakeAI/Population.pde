@@ -1,6 +1,5 @@
 class Population {
   private Player[] players;
-  float averageScore = -1;
   /* Setting this initially to 300 as this is an arbitrary number greater than 200. */
   int framesSinceLastSort = 300;
   
@@ -101,7 +100,7 @@ class Population {
       nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights());
     }
     
-    avgScore.add((float)pop.scoreSum() / (float)populationSize);
+    avgScore.add(scoreSum() / (float) populationSize);
     maxScore.add(players[bestIndex].level.score);
     
     gen++;
@@ -109,7 +108,7 @@ class Population {
     save();
   }
   
-  /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimicks breeding. */
+  /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimics breeding. */
   private NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
     /* Normally, I should compare each NN to check their dimensions are the same, but as all NNs in this
        program are created with exactly the same dimensions, this isn't an issue. */
