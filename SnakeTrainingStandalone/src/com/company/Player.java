@@ -1,40 +1,60 @@
 package com.company;
+/* This class manages the level, along with the neural network that controls the snake. */
 class Player {
   NeuralNetwork nn;
   Level level;
-  PVector startPos;
-  PVector startAngle;
-  float[] input = new float[0];
-  
-  Player(int[] lengthArr) {
-    nn = new NeuralNetwork(lengthArr);
-    level = new Level(40, 40);
-  }
-  
-  Player(NeuralNetwork nnInput) {
-    nn = nnInput;
-    level = new Level(40, 40);
+
+  Player() {
+    nn = new NeuralNetwork();
+    level = new Level();
   }
 
+  Player(NeuralNetwork nn) {
+    this.nn = nn;
+    level = new Level();
+  }
+
+  /* Uses the NN to look at the current state of the game and then decide the next move to make. */
   void update() {
-    if (!level.snake.dead) {
-      input = level.vision();
-      
-      float[] output = nn.feedForward(input).toArray();
-      
+    if (!isDead()) {
+      float[] output = nn.feedForward(level.vision());
+
+      /* This code looks at the strongest output from the NN to decide what move to make. */
       float max = output[0];
       int maxIndex = 0;
-      
+
       for (int i = 1; i < output.length; i++) {
         if (output[i] > max) {
           max = output[i];
           maxIndex = i;
         }
       }
-      
-      level.snake.direction = maxIndex;
+
+      PVector dir = new PVector(0, 0);
+
+      switch(maxIndex){
+        case 0:
+          dir = new PVector(0, 1);
+          break;
+        case 1:
+          dir = new PVector(1, 0);
+          break;
+        case 2:
+          dir = new PVector(0, -1);
+          break;
+        case 3:
+          dir = new PVector(-1, 0);
+          break;
+      }
+
+      /* Changes the direction of the snake to the newly decided direction. */
+      level.snake.direction = dir;
+
+      level.update();
     }
-    
-    level.update();
+  }
+
+  boolean isDead() {
+    return level.snake.dead;
   }
 }

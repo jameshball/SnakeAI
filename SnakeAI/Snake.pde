@@ -8,7 +8,7 @@ class Snake {
   
   Snake() {
     /* This resets the snake's head to a random position at least 1 square away from the edges. */
-    pos = new PVector((int)random(gridX - 1) + 1, (int)random(gridY - 1) + 1);
+    pos = new PVector((int) random(gridX - 1) + 1, (int) random(gridY - 1) + 1);
     dead = false;
     body = new ArrayList<PVector>();
     body.add(new PVector(pos.x, pos.y));

@@ -11,8 +11,8 @@ final int APPLE = -1;
    these dimensions to render graphs. This is just the size of the snake's render area. */
 int snakeWidth = 600;
 int snakeHeight = 600;
-int gridX = 40;
-int gridY = 40;
+int gridX = 20;
+int gridY = 20;
 
 int playersRendered = 0;
 int gen = 0;
@@ -40,7 +40,7 @@ void setup() {
   maxScore = new Graph("Generation", "Max. score", color(0));
   avgScore = new Graph("Generation", "Avg. score", color(255, 0, 0));
   /* Loads the last-run program from a file. */
-  //pop.load("/data/program.json");
+  pop.load("/data/program.json");
 }
 
 /* The draw method is executed every frame. This is the main functionality of the program. */
