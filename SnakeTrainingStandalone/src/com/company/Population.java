@@ -184,7 +184,7 @@ class Population {
     program.put("avgScoreData", avgScoreData);
 
     /* Saves the JSONObject to the specified path. */
-    try (PrintWriter out = new PrintWriter("C:\\dev\\SnakeAI\\SnakeTrainingStandalone\\data\\nn.json")) {
+    try (PrintWriter out = new PrintWriter(workingDir + "/data/program.json")) {
       out.println(program.toString());
     }
     catch (FileNotFoundException e) {}

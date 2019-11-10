@@ -1,10 +1,10 @@
 package com.company;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
+    static String workingDir = System.getProperty("user.dir");
     static int[] networkStructure = new int[] { 24, 16, 4 };
     static int populationSize = 500;
     static int gridX = 20;
