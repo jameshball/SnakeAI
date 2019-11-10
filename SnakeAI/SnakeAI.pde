@@ -11,10 +11,10 @@ final int APPLE = -1;
    these dimensions to render graphs. This is just the size of the snake's render area. */
 int snakeWidth = 600;
 int snakeHeight = 600;
-int gridX = 20;
-int gridY = 20;
+int gridX = 40;
+int gridY = 40;
 
-int playersRendered = 0;
+int playersRendered = 10;
 int gen = 0;
 /* These are all hyper-parameters for the neural network and genetic algorithm. */
 int populationSize = 500;
