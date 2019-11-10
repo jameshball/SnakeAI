@@ -8,12 +8,12 @@ class Player {
   
   Player(int[] lengthArr) {
     nn = new NeuralNetwork(lengthArr);
-    level = new Level(20, 20);
+    level = new Level(40, 40);
   }
   
   Player(NeuralNetwork nnInput) {
     nn = nnInput;
-    level = new Level(20, 20);
+    level = new Level(40, 40);
   }
 
   void update() {

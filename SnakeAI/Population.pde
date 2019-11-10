@@ -1,43 +1,83 @@
 class Population {
-  Player[] players;
-  int bestIndex = -1;
-  int framesSinceLastSort;
-  Graph maxFitnessGraph;
-  Graph avgFitnessGraph;
-  NNGraph nnGraph;
-  
-  Population (int pSize, int[] lengthArr) {
-    players = new Player[pSize];
-    
-    for (int i = 0; i < pSize; i++) {
-      players[i] = new Player(lengthArr);
-    }
-    
-    framesSinceLastSort = frameCount;
-    nnGraph = new NNGraph(players[0].nn, 700, 950, 10, 10);
-  }
+  private Player[] players;
+  float averageScore = -1;
+  /* Setting this initially to 300 as this is an arbitrary number greater than 200. */
+  int framesSinceLastSort = 300;
   
   Population() {
-    players = new Player[1];
-    players[0] = new Player(new int[] { 1, 1});
+    players = new Player[populationSize];
     
-    framesSinceLastSort = frameCount;
-    nnGraph = new NNGraph(players[0].nn, 700, 950, 10, 10);
+    for (int i = 0; i < populationSize; i++) {
+      players[i] = new Player();
+    }
   }
   
+  /* Displays the best snakes to the screen. The number of snakes shown is determined by the
+     playersRendered variable in the Main class. */
   void show() {
-    showBestPlayers();
+    /* Check if any players need to be rendered. */
+    if (playersRendered > 0) {
+      /* If it's been more than 200 frames since the last sort... */
+      if (framesSinceLastSort > 200) {
+        /* Sorts all players in the players array based on their score. The highest scoring players are
+           at the front of the array. */
+        Arrays.sort(players, new PlayerComparator());
+        Collections.reverse(Arrays.asList(players));
+        
+        framesSinceLastSort = 0;
+      }
+      
+      /* Shows these players as normal snakes. i.e. not best-performing. */
+      for (int i = 1; i < playersRendered; i++) {
+        players[i].show(false);
+      }
+      
+      /* The best player is the first in the list as it has been sorted. This player is shown last
+         so that they display above all other snakes. */
+      players[0].show(true);
+    }
+    
+    framesSinceLastSort++;
   }
   
+  /* This is a custom Comparator class that is implemented to define how two player objects should be
+     compared. If the player is dead, it has a score of -1, otherwise its score is the number of apples
+     obtained. This score of two players is compared to allow sorting of the players array. */
+  private class PlayerComparator implements Comparator<Player> {
+    @Override
+    public int compare(Player p1, Player p2) {
+      int score1 = p1.level.score;
+      int score2 = p2.level.score;
+      
+      if (p1.level.snake.dead) {
+        score1 = -1;
+      }
+      
+      if (p2.level.snake.dead) {
+        score2 = -1;
+      }
+      
+      /* Returns -1, 0 and 1 for less than, equal to or greater than, respectively. */
+      return Integer.compare(score1, score2);
+    }
+  }
+  
+  /* Executes every frame to update the game-state and checks if the generation has ended yet. */
   void update() {
     for (int i = 0; i < players.length; i++) {
       players[i].update();
     }
+    
+    /* If all snakes have died, create the next generation of players. */
+    if (isAllDead()) {
+      naturalSelection();
+    }
   }
   
-  boolean isAllDead() {
+  /* Returns true is all snakes have died, false otherwise. */
+  private boolean isAllDead() {
     for (int i = 0; i < players.length; i++) {
-      if (!players[i].level.snake.dead) {
+      if (!players[i].isDead()) {
         return false;
       }
     }
@@ -45,89 +85,85 @@ class Population {
     return true;
   }
   
-  void naturalSelection() {
-    Player[] nextGen = new Player[players.length];
+  /* This selects the best players from the last generation, 'breeds' them and then mutates them -
+     mimicking natural selection to generate a new generation of players. */
+  private void naturalSelection() {
+    Player[] nextGen = new Player[populationSize];
     
-    bestIndex = getBest();
-    nextGen[players.length - 1] = new Player(players[bestIndex].nn);
+    int bestIndex = getBest();
     
-    gen++;
+    /* We move the best player from the last generation into the new generation to ensure the next
+       generation's best shouldn't perform worse. */
+    nextGen[0] = new Player(players[bestIndex].nn);
     
-    for (int i = 0; i < players.length - 1; i++) {
+    for (int i = 1; i < populationSize; i++) {
+      /* Create each player in the new generation by performing selection, crossover and mutation. */
       nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights());
     }
     
-    float maxScore = players[0].level.score;
+    avgScore.add((float)pop.scoreSum() / (float)populationSize);
+    maxScore.add(players[bestIndex].level.score);
     
-    for (int i = 1; i < players.length; i++) {
-      if (players[i].level.score > maxScore) {
-        maxScore = players[i].level.score;
-      }
-    }
-    
-    maxFitnessGraph.addData(new Datapoint(maxScore, false));
-    avgFitnessGraph.addData(new Datapoint(scoreSum() / players.length, false));
-    
+    gen++;
     players = nextGen;
-    
-    saveProgram();
+    save();
   }
   
-  NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
-    if (parent1.dimensionsAreIdentical(parent2)) {
-      NeuralNetwork child = new NeuralNetwork(parent1.lengths);
-      
-      for (int i = 0; i < child.weightMatrices.length; i++) {
-        for (int j = 0; j < child.weightMatrices[i].rows; j++) {
-          for (int k = 0; k < child.weightMatrices[i].cols; k++) {
-            if (random(1) > 0.5) {
-              child.weightMatrices[i].data[j][k] = parent1.weightMatrices[i].data[j][k];
-            }
-            else {
-              child.weightMatrices[i].data[j][k] = parent2.weightMatrices[i].data[j][k];
-            }
+  /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimicks breeding. */
+  private NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
+    /* Normally, I should compare each NN to check their dimensions are the same, but as all NNs in this
+       program are created with exactly the same dimensions, this isn't an issue. */
+    NeuralNetwork child = new NeuralNetwork();
+    
+    for(int i = 0; i < parent1.weightMatrices.length; i++) {
+      for (int j = 0; j < parent1.weightMatrices[i].rows; j++) {
+        for (int k = 0; k < parent1.weightMatrices[i].cols; k++) {
+          /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
+          if (random(1) > 0.5) {
+            child.weightMatrices[i].data[j][k] = parent1.weightMatrices[i].data[j][k];
+          }
+          else {
+            child.weightMatrices[i].data[j][k] = parent2.weightMatrices[i].data[j][k];
           }
         }
       }
+    }
+    
+    return child;
+  }
+  
+  /* Returns the sum of all snake fitness. This is their score squared. */
+  private float fitnessSum() {
+    float total = 0;
+    
+    for (int i = 0; i < players.length; i++) {
+      total += pow(players[i].level.score, 2);
+    }
+    
+    return total;
+  }
+  
+  /* Returns the sum of all snake scores. i.e. the total number of apples eaten. */
+  private float scoreSum() {
+    float total = 0;
+    
+    for (int i = 0; i < players.length; i++) {
+      total += players[i].level.score;
+    }
+    
+    return total;
+  }
+  
+  /* Randomly selects a NN from a player in the population based on how well they performed. It is a
+     random selection, but players that perform better are more likely to be chosen. */
+  private NeuralNetwork selectParent() {
+    float threshold = random(fitnessSum());
+    float total = 0;
+    
+    for (int i = 0; i < players.length; i++) {
+      total += pow(players[i].level.score, 2);
       
-      return child;
-    }
-    
-    return null;
-  }
-  
-  float fitnessSum() {
-    float sum = 0;
-    
-    for (int i = 0; i < players.length; i++) {
-      sum += players[i].level.fitness;
-    }
-    
-    return sum;
-  }
-  
-  float scoreSum() {
-    float sum = 0;
-    
-    for (int i = 0; i < players.length; i++) {
-      sum += players[i].level.score;
-    }
-    
-    return sum;
-  }
-  
-  NeuralNetwork selectParent() {
-    if (fitnessSum() == 0) {
-      return players[(int)random(players.length)].nn;
-    }
-    
-    float randomNum = random(fitnessSum());
-    float runningSum = 0;
-    
-    for (int i = 0; i < players.length; i++) {
-      runningSum += players[i].level.fitness;
-      
-      if (runningSum > randomNum) {
+      if (total > threshold) {
         return players[i].nn;
       }
     }
@@ -135,13 +171,14 @@ class Population {
     return null;
   }
   
-  int getBest() {
-    float max = players[0].level.fitness;
+  /* Returns the index of the snake that is currently the longest. */
+  private int getBest() {
+    int max = players[0].level.score;
     int maxIndex = 0;
     
     for (int i = 1; i < players.length; i++) {
-      if (players[i].level.fitness > max) {
-        max = players[i].level.fitness;
+      if (players[i].level.score > max) {
+        max = players[i].level.score;
         maxIndex = i;
       }
     }
@@ -149,134 +186,95 @@ class Population {
     return maxIndex;
   }
   
+  /* Returns the number of snakes in the population of players that are dead. */
   int getNumberDead() {
-    int sum = 0;
+    int noDead = 0;
     
     for (int i = 0; i < players.length; i++) {
       if (players[i].level.snake.dead) {
-        sum++;
+        noDead++;
       }
     }
     
-    return sum;
+    return noDead;
   }
   
-  void showBestPlayers() {
-    if (playersRendered > 0) {
-      for (int i = 0; i < players.length; i++) {
-        players[i].level.calculateFitness();
-      }
-      
-      if (frameCount - framesSinceLastSort > 200) {
-        sortPlayers();
-        
-        framesSinceLastSort = frameCount;
-      }
-      
-      for (int i = 1; i < playersRendered; i++) {
-        players[i].show();
-        players[i].level.isBest = false;
-      }
-      
-      players[0].level.isBest = true;
-      players[0].show();
-      
-      nnGraph.nn = players[0].nn;
-    }
-    
-  }
-  
-  void sortPlayers() {
-    Arrays.sort(players, new Comparator<Player>() {
-      @Override
-      public int compare(Player p1, Player p2) {
-        float fitness1 = p1.level.fitness;
-        float fitness2 = p2.level.fitness;
-        
-        if (p1.level.snake.dead) {
-          fitness1 = -1;
-        }
-        
-        if (p2.level.snake.dead) {
-          fitness2 = -1;
-        }
-        
-        return Float.compare(fitness1, fitness2);
-      }
-    });
-    
+  void save() {
+    /* Sorts all players in the players array based on their score. The highest scoring players are
+       at the front of the array. */
+    Arrays.sort(players, new PlayerComparator());
     Collections.reverse(Arrays.asList(players));
-  }
-  
-  void saveProgram() {
-    sortPlayers();
     
     JSONObject program = new JSONObject();
     JSONArray neuralNetworks = new JSONArray();
-    JSONArray maxFitnessData = new JSONArray();
-    JSONArray avgFitnessData = new JSONArray();
+    JSONArray maxScoreData = new JSONArray();
+    JSONArray avgScoreData = new JSONArray();
     
+    program.setInt("layerCount", networkStructure.length);
+    
+    /* Appends all of the networkStructure information to the program JSONObject. */
+    for (int i = 0; i < networkStructure.length; i++) {
+      program.setInt("length " + i, networkStructure[i]);
+    }
+    
+    /* Saves the current generation number to the JSONObject. */
     program.setInt("gen", gen);
-    program.setInt("start", start);
     
     for (int i = 0; i < players.length; i++) {
+      /* Appends all the player's neural networks to the neuralNetwork JSONArray. */
       neuralNetworks.setJSONObject(i, players[i].nn.save());
     }
     
-    for (int i = 0; i < maxFitnessGraph.data[0].size(); i++) {
-      JSONObject datapoint = new JSONObject();
-      
-      datapoint.setFloat("data", maxFitnessGraph.data[0].get(i).data);
-      datapoint.setBoolean("isInteger", maxFitnessGraph.data[0].get(i).isInteger);
-      datapoint.setBoolean("isEmpty", maxFitnessGraph.data[0].get(i).isEmpty);
-      
-      maxFitnessData.setJSONObject(i, datapoint);
+    for (int i = 0; i < maxScore.size(); i++) {
+      /* Saves all graph data to the maxScoreData JSONObject. */
+      maxScoreData.setFloat(i, maxScore.get(i));
     }
     
-    for (int i = 0; i < avgFitnessGraph.data[0].size(); i++) {
-      JSONObject datapoint = new JSONObject();
-      
-      datapoint.setFloat("data", avgFitnessGraph.data[0].get(i).data);
-      datapoint.setBoolean("isInteger", avgFitnessGraph.data[0].get(i).isInteger);
-      datapoint.setBoolean("isEmpty", avgFitnessGraph.data[0].get(i).isEmpty);
-      
-      avgFitnessData.setJSONObject(i, datapoint);
+    for (int i = 0; i < avgScore.size(); i++) {
+      avgScoreData.setFloat(i, avgScore.get(i));
     }
     
     program.setJSONArray("neuralNetworks", neuralNetworks);
-    program.setJSONArray("maxFitnessData", maxFitnessData);
-    program.setJSONArray("avgFitnessData", avgFitnessData);
+    program.setJSONArray("maxScoreData", maxScoreData);
+    program.setJSONArray("avgScoreData", avgScoreData);
     
+    /* Saves the JSONObject to the specified path. */
     saveJSONObject(program, "/data/program.json");
   }
   
-  void loadProgram(String path) {
+  void load(String path) {
+    /* Loads the JSONObject from the specified path. */
     JSONObject program = loadJSONObject(path);
     JSONArray neuralNetworks = program.getJSONArray("neuralNetworks");
-    JSONArray maxFitnessData = program.getJSONArray("maxFitnessData");
-    JSONArray avgFitnessData = program.getJSONArray("avgFitnessData");
+    JSONArray maxScoreData = program.getJSONArray("maxScoreData");
+    JSONArray avgScoreData = program.getJSONArray("avgScoreData");
+    
+    networkStructure = new int[program.getInt("layerCount")];
+    
+    /* Loads all details about the networkStructure from the JSONObject. */
+    for (int i = 0; i < networkStructure.length; i++) {
+      networkStructure[i] = program.getInt("length " + Integer.toString(i));
+    }
     
     gen = program.getInt("gen");
-    start = program.getInt("start");
     
-    if (neuralNetworks.size() == popSize) {
-      players = new Player[popSize];
-      
-      for (int i = 0; i < popSize; i++) {
-        players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)));
-      }
+    /* Change populationSize to the number of neural networks in the neuralNetworks JSONArray. */
+    populationSize = neuralNetworks.size();
+    
+    players = new Player[populationSize];
+    
+    for (int i = 0; i < populationSize; i++) {
+      /* Initialises new Player objects using the neural network JSONObjects in neuralNetworks. */
+      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)));
     }
     
-    maxFitnessGraph.data[0] = new ArrayList<Datapoint>();
-    
-    for (int i = 0; i < maxFitnessData.size(); i++) {
-      maxFitnessGraph.data[0].add(new Datapoint(maxFitnessData.getJSONObject(i)));
+    /* Loads all graph data. */
+    for (int i = 0; i < maxScoreData.size(); i++) {
+      maxScore.add(maxScoreData.getFloat(i));
     }
     
-    avgFitnessGraph.data[0] = new ArrayList<Datapoint>();
-    
-    for (int i = 0; i < avgFitnessData.size(); i++) {
-      avgFitnessGraph.data[0].add(new Datapoint(avgFitnessData.getJSONObject(i)));
+    for (int i = 0; i < avgScoreData.size(); i++) {
+      avgScore.add(avgScoreData.getFloat(i));
     }
   }
 }
