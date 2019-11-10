@@ -41,7 +41,7 @@ class NeuralNetwork {
         layers[i] = weightMatrices[i - 1].multiply(layers[i - 1]).applyReLu().addBias();
       }
       
-      layers[layers.length - 1] = weightMatrices[weightMatrices.length - 1].multiply(layers[layers.length - 2]).applyReLu();
+      layers[layers.length - 1] = weightMatrices[weightMatrices.length - 1].multiply(layers[layers.length - 2]).applySigmoid();
       
       return layers[layers.length - 1];
     }
