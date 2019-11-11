@@ -35,6 +35,7 @@ class Player {
       
       PVector dir = new PVector();
       
+      /* Converts the 0-3 output into PVectors. */
       switch(maxIndex){
         case 0:
           dir = new PVector(0, 1);

@@ -105,24 +105,24 @@ class Graph {
       
       /* Draw the label at every multiple of the increment. */
       for (int i = 0; i < size(); i += horizontalIncrement) {
+        /* 10 and 25 are arbitrary values that help format the text correctly. */
         text(i, i * textWidth + graphX + 10 - textWidth(Integer.toString(i)) / 2, graphY + graphHeight + 25);
       }
       
-      /* Change the colour of the line to the colour specified in the constructor. */
       stroke(lineColor);
-      /* Thickens the line. */
       strokeWeight(4);
       
       /* Draws line graph. */
       for (int i = 0; i < size() - 1; i++) {
-        float value1Y = ((data.get(i) - min) * textHeight) / verticalIncrement;
-        float value2Y = ((data.get(i + 1) - min) * textHeight) / verticalIncrement;
+        /* Defines the relative y coordinates of the line. */
+        float y1 = ((data.get(i) - min) * textHeight) / verticalIncrement;
+        float y2 = ((data.get(i + 1) - min) * textHeight) / verticalIncrement;
         
-        /* Defines the x position of where the line is drawn from. The value 10 acts as padding.*/
-        float xPos = i*textWidth + graphX + 10;
+        /* Defines the x position of where the line is drawn from. The value 10 acts as padding. */
+        float xPos = i * textWidth + graphX + 10;
         
         /* Draws the line. */
-        line(xPos, graphY + graphHeight - value1Y, xPos + textWidth, graphY + graphHeight - value2Y);
+        line(xPos, graphY + graphHeight - y1, xPos + textWidth, graphY + graphHeight - y2);
       }
     }
   }

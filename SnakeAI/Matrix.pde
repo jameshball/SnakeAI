@@ -119,7 +119,7 @@ class Matrix {
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         float x = data[i][j];
-        /* This implements the sigmoid function: 1/(1+e^-x). */
+        /* This implements the sigmoid function: f(x) = 1/(1+e^-x). */
         data[i][j] = 1.0 / (1.0 + exp(-x));
       }
     }

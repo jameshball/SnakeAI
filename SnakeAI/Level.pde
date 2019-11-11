@@ -25,7 +25,8 @@ class Level {
     }
   }
   
-  /* Generates a new apple position, which is a random location that is not taken up by the snake. */
+  /* Generates a new apple position, which is a random location that is not taken up by the snake.
+     TODO: Make this more efficient. In the late-game, random() will be called far too many times. */
   private void resetApple() {
     do  {
       /* Create a new random location within the boundaries of the grid. */
@@ -54,6 +55,7 @@ class Level {
         resetApple();
         score++;
         movesSinceLastApple = 0;
+        /* TODO: Turn this function into a lookup table to prevent repeat calculations. */
         nextAppleMoves = (int) (200 * (Math.log(snake.body.size()) / Math.log(3)) + 300);
       }
       else {
@@ -76,7 +78,7 @@ class Level {
     for (int i = 0; i < gridX; i++) {
       for (int j = 0; j < gridY; j++) {
         /* Checks the current square in the grid and changes the colour accordingly. Also checks if this
-           level is the current 'best'. */
+           level is the current 'best', meaning it has the highest score in the population. */
         if (grid[i][j] == APPLE) {
           fill(255, 150, 150);
           if (isBest) {
@@ -99,7 +101,9 @@ class Level {
     }
   }
   
-  /* Resets the grid and populates it with the locations of the snake and the apple. */
+  /* Resets the grid and populates it with the locations of the snake and the apple.
+     TODO: Make this more efficient by only updating cells that need to be updated, rather than building
+     the grid from scratch. */
   private void updateGrid() {
     resetGrid();
     
@@ -132,7 +136,7 @@ class Level {
     while(withinBounds(snakePos.add(direction))) {
       /* If snakePos comes in contact with the snake's body and vision[0] is unassigned... */ 
       if (grid[(int) snakePos.x][(int) snakePos.y] == SNAKE && vision[0] == 0) {
-        vision[0] = 1.0 / (float) distance;
+        vision[0] = 1.0f / distance;
       }
       
       /* If snakePos comes in contact with an apple and vision[1] is unassigned... */ 
@@ -144,7 +148,7 @@ class Level {
     }
     
     /* Sets the distance to the wall of the grid. */
-    vision[2] = 1.0 / (float) distance;
+    vision[2] = 1.0f / distance;
     
     return Arrays.asList(vision);
   }
