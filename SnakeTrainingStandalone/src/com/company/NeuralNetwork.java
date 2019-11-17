@@ -47,22 +47,21 @@ class NeuralNetwork {
       Matrix currentLayer = new Matrix(arr);
 
       /* Works through the NN and repeatedly calculates the next layer by multiplying the weight matrix
-         by the current layer and applying the activation function. */
+      by the current layer and applying the activation function. */
       for (int i = 0; i < weightMatrices.length; i++) {
         currentLayer = weightMatrices[i].multiply(currentLayer.addBias()).applyReLu();
       }
 
       return currentLayer.toArray();
-    }
-    else {
+    } else {
       throw new IllegalArgumentException();
     }
   }
 
   /* Mutates all weightMatrices and returns the NN object. */
   NeuralNetwork mutateWeights() {
-    for (int i = 0; i < weightMatrices.length; i++) {
-      weightMatrices[i].mutate();
+    for (Matrix weightMatrix : weightMatrices) {
+      weightMatrix.mutate();
     }
 
     return this;

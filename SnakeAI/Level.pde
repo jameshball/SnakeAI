@@ -33,6 +33,8 @@ class Level {
       apple = new PVector((int) random(gridX), (int) random(gridY));
       /* Repeat while the apple is already taken up by the snake. */
     } while ((apple.x == snake.pos.x && apple.y == snake.pos.y) || snake.isTail(apple));
+    
+    set(apple, APPLE);
   }
   
   /* The update method moves the head of the snake and checks if it has died. If the snake has eaten an
@@ -55,15 +57,17 @@ class Level {
         resetApple();
         score++;
         movesSinceLastApple = 0;
+        updateGrid(true, new PVector());
         /* TODO: Turn this function into a lookup table to prevent repeat calculations. */
         nextAppleMoves = (int) (200 * (Math.log(snake.body.size()) / Math.log(3)) + 300);
       }
       else {
+        PVector tail = snake.body.get(0);
+        updateGrid(false, tail);
         snake.move();
       }
       
       movesSinceLastApple++;
-      updateGrid();
     }
   }
   
@@ -101,17 +105,13 @@ class Level {
     }
   }
   
-  /* Resets the grid and populates it with the locations of the snake and the apple.
-     TODO: Make this more efficient by only updating cells that need to be updated, rather than building
-     the grid from scratch. */
-  private void updateGrid() {
-    resetGrid();
-    
-    set(apple, APPLE);
-    
-    for (int i = 0; i < snake.body.size(); i++) {
-      set(snake.body.get(i), SNAKE);
+  /* Updates the snake's position in the grid. */
+  private void updateGrid(boolean appleEaten, PVector tailPos) {
+    if (!appleEaten) {
+      set(tailPos, EMPTY);
     }
+    
+    set(snake.pos, SNAKE);
   }
   
   /* Sets the element stored at 'pos' in the grid array to the value 'objectType'. */

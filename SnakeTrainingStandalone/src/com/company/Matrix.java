@@ -5,7 +5,7 @@ import static com.company.HelperClass.randomGaussian;
 import static java.lang.Math.exp;
 
 /* The Matrix class is used by the NeuralNetwork class to store the weight matrices.
-   It provides functions for manipulating and multiplying matrices. */
+It provides functions for manipulating and multiplying matrices. */
 class Matrix {
   int rows;
   int cols;
@@ -42,7 +42,7 @@ class Matrix {
     Matrix m;
 
     /* This should only add a bias node to a one-column matrix so an exception is thrown if the matrix
-       is not Nx1. */
+    is not Nx1. */
     if (cols == 1) {
       m = new Matrix(rows + 1, cols);
 
@@ -51,8 +51,7 @@ class Matrix {
       }
 
       m.data[rows][0] = 1;
-    }
-    else {
+    } else {
       throw new IllegalArgumentException();
     }
 
@@ -71,28 +70,25 @@ class Matrix {
   }
 
   /* Mutates every value in the current matrix using the mutationRate hyper-parameter and returns it. */
-  Matrix mutate() {
+  void mutate() {
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
         /* The mutationRate hyper-parameter in the Main class determines how often this occurs. */
         if (random(1) < Main.mutationRate) {
           /* randomGaussian() generates a random number using normalized Gaussian distribution. Dividing
-             by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
-             positive impact. */
+          by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
+          positive impact. */
           data[i][j] += randomGaussian() / 5;
 
           /* If the weight falls outside the -1.0 to 1.0 range after mutation, limit it to this range. */
           if (data[i][j] > 1) {
             data[i][j] = 1;
-          }
-          else if (data[i][j] < -1) {
+          } else if (data[i][j] < -1) {
             data[i][j] = -1;
           }
         }
       }
     }
-
-    return this;
   }
 
   /* Multiplies two matrices and returns the result as a new Matrix object. */
@@ -100,7 +96,7 @@ class Matrix {
     Matrix r = new Matrix(rows, m.cols);
 
     /* This performs matrix multiplication, as detailed in the Analysis section. The column number of this
-       matrix must be the same as the row number of the matrix we are multiplying by. */
+    matrix must be the same as the row number of the matrix we are multiplying by. */
     if (cols == m.rows) {
       for (int i = 0; i < rows; i++) {
         for (int j = 0; j < m.cols; j++) {
@@ -112,8 +108,7 @@ class Matrix {
           r.data[i][j] = sum;
         }
       }
-    }
-    else {
+    } else {
       throw new IllegalArgumentException();
     }
 
@@ -149,11 +144,11 @@ class Matrix {
 
   /* Converts the matrix data to a 1D array of length rows*cols. */
   float[] toArray() {
-    float[] arr = new float[rows*cols];
+    float[] arr = new float[rows * cols];
 
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
-        arr[i*cols + j] = data[i][j];
+        arr[i * cols + j] = data[i][j];
       }
     }
 

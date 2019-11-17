@@ -12,7 +12,7 @@ import static com.company.Main.*;
 
 class Population {
   private Player[] players;
-  int gen = 0;
+  private int gen = 0;
 
   Population() {
     players = new Player[populationSize];
@@ -24,7 +24,7 @@ class Population {
 
   /* Executes every frame to update the game-state and checks if the generation has ended yet. */
   void update() {
-    Arrays.stream(players).parallel().forEach(p -> p.update());
+    Arrays.stream(players).parallel().forEach(Player::update);
 
     /* If all snakes have died, create the next generation of players. */
     if (isAllDead()) {
@@ -35,7 +35,7 @@ class Population {
   /* Returns true is all snakes have died, false otherwise. */
   private boolean isAllDead() {
     for (int i = 0; i < players.length; i++) {
-      if (!players[i].isDead()) {
+      if (players[i].isAlive()) {
         return false;
       }
     }
@@ -44,14 +44,14 @@ class Population {
   }
 
   /* This selects the best players from the last generation, 'breeds' them and then mutates them -
-     mimicking natural selection to generate a new generation of players. */
+  mimicking natural selection to generate a new generation of players. */
   private void naturalSelection() {
     Player[] nextGen = new Player[populationSize];
 
     int bestIndex = getBest();
 
     /* We move the best player from the last generation into the new generation to ensure the next
-       generation's best shouldn't perform worse. */
+    generation's best shouldn't perform worse. */
     nextGen[0] = new Player(players[bestIndex].nn);
 
     for (int i = 1; i < populationSize; i++) {
@@ -75,17 +75,16 @@ class Population {
   /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimics breeding. */
   private NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
     /* Normally, I should compare each NN to check their dimensions are the same, but as all NNs in this
-       program are created with exactly the same dimensions, this isn't an issue. */
+    program are created with exactly the same dimensions, this isn't an issue. */
     NeuralNetwork child = new NeuralNetwork();
 
-    for(int i = 0; i < parent1.weightMatrices.length; i++) {
+    for (int i = 0; i < parent1.weightMatrices.length; i++) {
       for (int j = 0; j < parent1.weightMatrices[i].rows; j++) {
         for (int k = 0; k < parent1.weightMatrices[i].cols; k++) {
           /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
           if (random(1) > 0.5) {
             child.weightMatrices[i].data[j][k] = parent1.weightMatrices[i].data[j][k];
-          }
-          else {
+          } else {
             child.weightMatrices[i].data[j][k] = parent2.weightMatrices[i].data[j][k];
           }
         }
@@ -99,8 +98,8 @@ class Population {
   private float fitnessSum() {
     float total = 0;
 
-    for (int i = 0; i < players.length; i++) {
-      total += Math.pow(players[i].level.score, 2);
+    for (Player player : players) {
+      total += Math.pow(player.level.score, 2);
     }
 
     return total;
@@ -110,24 +109,24 @@ class Population {
   private float scoreSum() {
     float total = 0;
 
-    for (int i = 0; i < players.length; i++) {
-      total += players[i].level.score;
+    for (Player player : players) {
+      total += player.level.score;
     }
 
     return total;
   }
 
   /* Randomly selects a NN from a player in the population based on how well they performed. It is a
-     random selection, but players that perform better are more likely to be chosen. */
+  random selection, but players that perform better are more likely to be chosen. */
   private NeuralNetwork selectParent() {
     float threshold = random(fitnessSum());
     float total = 0;
 
-    for (int i = 0; i < players.length; i++) {
-      total += Math.pow(players[i].level.score, 2);
+    for (Player player : players) {
+      total += Math.pow(player.level.score, 2);
 
       if (total > threshold) {
-        return players[i].nn;
+        return player.nn;
       }
     }
 
@@ -149,7 +148,7 @@ class Population {
     return maxIndex;
   }
 
-  void save() {
+  private void save() {
     JSONObject program = new JSONObject();
     JSONArray neuralNetworks = new JSONArray();
     JSONArray maxScoreData = new JSONArray();
@@ -186,8 +185,8 @@ class Population {
     /* Saves the JSONObject to the specified path. */
     try (PrintWriter out = new PrintWriter(workingDir + "/data/program.json")) {
       out.println(program.toString());
+    } catch (FileNotFoundException e) {
     }
-    catch (FileNotFoundException e) {}
   }
 
   void load(String path) {

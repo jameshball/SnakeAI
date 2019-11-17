@@ -16,7 +16,7 @@ class Player {
 
   /* Uses the NN to look at the current state of the game and then decide the next move to make. */
   void update() {
-    if (!isDead()) {
+    if (isAlive()) {
       float[] output = nn.feedForward(level.vision());
 
       /* This code looks at the strongest output from the NN to decide what move to make. */
@@ -32,7 +32,7 @@ class Player {
 
       PVector dir = new PVector(0, 0);
 
-      switch(maxIndex){
+      switch (maxIndex) {
         case 0:
           dir = new PVector(0, 1);
           break;
@@ -54,7 +54,7 @@ class Player {
     }
   }
 
-  boolean isDead() {
-    return level.snake.dead;
+  boolean isAlive() {
+    return !level.snake.dead;
   }
 }

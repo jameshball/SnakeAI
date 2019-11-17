@@ -7,7 +7,7 @@ import static com.company.Main.gridX;
 import static com.company.Main.gridY;
 
 /* Snake holds all the information about the Snake, including its current position, location of all parts
-   of its tail and whether it is still alive. */
+of its tail and whether it is still alive. */
 class Snake {
   PVector pos;
   ArrayList<PVector> body;
@@ -25,8 +25,8 @@ class Snake {
   }
 
   /* This method is executed every frame. 'direction' is updated externally and corresponds to the next
-     direction the snake will move in. 'direction' is added to the location of the snake's head.
-     It also checks if the snake has hit its tail or gone out of the bounds of the grid. */
+  direction the snake will move in. 'direction' is added to the location of the snake's head.
+  It also checks if the snake has hit its tail or gone out of the bounds of the grid. */
   void update() {
     pos.add(direction);
 
@@ -36,20 +36,20 @@ class Snake {
   }
 
   /* This method moves the snake by removing the last element in their tail and adding the location of the
-     snake's head. */
+  snake's head. */
   void move() {
     body.remove(0);
     body.add(new PVector(pos.x, pos.y));
   }
 
   /* This method extends the snake's body by adding the new position of the snake's head, without removing
-     the end of its tail. */
+  the end of its tail. */
   void extend() {
     body.add(new PVector(pos.x, pos.y));
   }
 
   /* Compares each part of the snake's tail with the new head position. If they are equal, the snake has
-     hit its tail. */
+  hit its tail. */
   boolean isTail(PVector vector) {
     for (int i = 0; i < body.size() - 1; i++) {
       PVector part = body.get(i);
