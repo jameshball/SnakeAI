@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ejml-simple-0.38">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../ejml-simple-0.38.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -16,5 +16,8 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="ejml-simple-0.38" level="project" />
+    <orderEntry type="library" name="ejml-core-0.38" level="project" />
+    <orderEntry type="library" name="ejml-ddense-0.38" level="project" />
   </component>
 </module>
