@@ -25,16 +25,25 @@ class Level {
     }
   }
   
-  /* Generates a new apple position, which is a random location that is not taken up by the snake.
-     TODO: Make this more efficient. In the late-game, random() will be called far too many times. */
+  /* Generates a new apple position, which is a random location that is not taken up by the snake. */
   private void resetApple() {
-    do  {
-      /* Create a new random location within the boundaries of the grid. */
-      apple = new PVector((int) random(gridX), (int) random(gridY));
-      /* Repeat while the apple is already taken up by the snake. */
-    } while ((apple.x == snake.pos.x && apple.y == snake.pos.y) || snake.isTail(apple));
+    int emptyGridSpaces = gridX * gridY - snake.body.size();
+    int randomFreeSpace = (int) random(emptyGridSpaces);
+    int emptySpaceCount = 0;
     
-    set(apple, APPLE);
+    for(int i = 0; i < gridX; i++) {
+      for (int j = 0; j < gridY; j++) {
+        if (grid[i][j] == EMPTY) {
+          emptySpaceCount++;
+          
+          if (emptySpaceCount >= randomFreeSpace) {
+            apple = new PVector(i, j);
+            set(apple, APPLE);
+            return;
+          }  
+        }
+      }
+    }
   }
   
   /* The update method moves the head of the snake and checks if it has died. If the snake has eaten an
