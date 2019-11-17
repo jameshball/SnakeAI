@@ -2,9 +2,9 @@ package com.company;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Arrays;
 
 import static com.company.HelperClass.random;
@@ -20,6 +20,10 @@ class Population {
     for (int i = 0; i < populationSize; i++) {
       players[i] = new Player();
     }
+  }
+
+  Population(String path) throws FileNotFoundException {
+    load(path);
   }
 
   /* Executes every frame to update the game-state and checks if the generation has ended yet. */
@@ -189,7 +193,42 @@ class Population {
     }
   }
 
-  void load(String path) {
-    // TODO
+  void load(String path) throws FileNotFoundException {
+    File file = new File(workingDir + path);
+
+    JSONTokener tokener = new JSONTokener(new FileInputStream(file));
+    JSONObject program = new JSONObject(tokener);
+
+    JSONArray neuralNetworks = program.getJSONArray("neuralNetworks");
+    JSONArray maxScoreData = program.getJSONArray("maxScoreData");
+    JSONArray avgScoreData = program.getJSONArray("avgScoreData");
+
+    networkStructure = new int[program.getInt("layerCount")];
+
+    /* Loads all details about the networkStructure from the JSONObject. */
+    for (int i = 0; i < networkStructure.length; i++) {
+      networkStructure[i] = program.getInt("length " + Integer.toString(i));
+    }
+
+    gen = program.getInt("gen");
+
+    /* Change populationSize to the number of neural networks in the neuralNetworks JSONArray. */
+    populationSize = neuralNetworks.length();
+
+    players = new Player[populationSize];
+
+    for (int i = 0; i < populationSize; i++) {
+      /* Initialises new Player objects using the neural network JSONObjects in neuralNetworks. */
+      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)));
+    }
+
+    /* Loads all graph data. */
+    for (int i = 0; i < maxScoreData.length(); i++) {
+      maxScore.add(maxScoreData.getFloat(i));
+    }
+
+    for (int i = 0; i < avgScoreData.length(); i++) {
+      avgScore.add(avgScoreData.getFloat(i));
+    }
   }
 }

@@ -1,5 +1,6 @@
 package com.company;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,12 +30,13 @@ public class Main {
         new PVector(-1, 1)
       };
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws FileNotFoundException {
     for (int i = 0; i < allowedMoves.length; i++) {
       allowedMoves[i] = (int) (200 * (Math.log(i) / Math.log(3)) + 300);
     }
 
-    Population pop = new Population();
+    Population pop = new Population("/data/program.json");
+
     while (true) {
       pop.update();
     }
