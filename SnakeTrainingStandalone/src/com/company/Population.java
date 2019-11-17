@@ -79,13 +79,13 @@ class Population {
     NeuralNetwork child = new NeuralNetwork();
 
     for (int i = 0; i < parent1.weightMatrices.length; i++) {
-      for (int j = 0; j < parent1.weightMatrices[i].rows; j++) {
-        for (int k = 0; k < parent1.weightMatrices[i].cols; k++) {
+      for (int j = 0; j < parent1.weightMatrices[i].numRows(); j++) {
+        for (int k = 0; k < parent1.weightMatrices[i].numCols(); k++) {
           /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
           if (random(1) > 0.5) {
-            child.weightMatrices[i].data[j][k] = parent1.weightMatrices[i].data[j][k];
+            child.weightMatrices[i].set(j, k, parent1.weightMatrices[i].get(j, k));
           } else {
-            child.weightMatrices[i].data[j][k] = parent2.weightMatrices[i].data[j][k];
+            child.weightMatrices[i].set(j, k, parent2.weightMatrices[i].get(j, k));
           }
         }
       }

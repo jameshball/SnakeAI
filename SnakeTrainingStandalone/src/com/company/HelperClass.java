@@ -6,7 +6,7 @@ class HelperClass {
   static int SNAKE = 1;
   static int EMPTY = 0;
   static int APPLE = -1;
-  private static Random rnd = new Random();
+  static Random rnd = new Random();
 
   static float random() {
     return rnd.nextFloat();
