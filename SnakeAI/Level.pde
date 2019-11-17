@@ -6,7 +6,6 @@ class Level {
   private PVector apple;
   int score;
   private int movesSinceLastApple = 0;
-  private int nextAppleMoves = 300;
   
   Level() {
     snake = new Snake();
@@ -53,7 +52,7 @@ class Level {
     snake.update();
   
     /* If the snake has run out of moves for this apple... */
-    if (movesSinceLastApple > nextAppleMoves) {
+    if (movesSinceLastApple > allowedMoves[snake.body.size()]) {
       snake.dead = true;
     }
     
@@ -67,8 +66,6 @@ class Level {
         score++;
         movesSinceLastApple = 0;
         updateGrid(true, new PVector());
-        /* TODO: Turn this function into a lookup table to prevent repeat calculations. */
-        nextAppleMoves = (int) (200 * (Math.log(snake.body.size()) / Math.log(3)) + 300);
       }
       else {
         PVector tail = snake.body.get(0);

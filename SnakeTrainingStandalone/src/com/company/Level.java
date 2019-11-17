@@ -5,8 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.company.HelperClass.*;
-import static com.company.Main.gridX;
-import static com.company.Main.gridY;
+import static com.company.Main.*;
 
 /* The Level class holds all details about the current state of the game, including the Snake,
 Apple and score. It has the functionality to update the grid each frame. */
@@ -16,7 +15,6 @@ class Level {
   private PVector apple;
   int score;
   private int movesSinceLastApple = 0;
-  private int nextAppleMoves = 300;
 
   Level() {
     snake = new Snake();
@@ -63,7 +61,7 @@ class Level {
     snake.update();
 
     /* If the snake has run out of moves for this apple... */
-    if (movesSinceLastApple > nextAppleMoves) {
+    if (movesSinceLastApple > allowedMoves[snake.body.size()]) {
       snake.dead = true;
     }
 
@@ -77,7 +75,6 @@ class Level {
         score++;
         movesSinceLastApple = 0;
         updateGrid(true, new PVector(0, 0));
-        nextAppleMoves = (int) (200 * (Math.log(snake.body.size()) / Math.log(3)) + 300);
       } else {
         PVector tail = snake.body.get(0);
         updateGrid(false, tail);

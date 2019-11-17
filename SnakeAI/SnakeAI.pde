@@ -14,6 +14,11 @@ int snakeHeight = 600;
 int gridX = 40;
 int gridY = 40;
 
+/* Stores the number of moves a snake is allowed to take to get an apple, given its current length. 
+   i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
+   length 5. */
+int[] allowedMoves = new int[gridX * gridY];
+
 int playersRendered = 10;
 int gen = 0;
 /* These are all hyper-parameters for the neural network and genetic algorithm. */
@@ -35,6 +40,7 @@ void setup() {
   frameRate(10000);
   
   start = millis();
+  initialiseAllowedMoves();
   
   pop = new Population();
   maxScore = new Graph("Generation", "Max. score", color(0));
@@ -106,5 +112,12 @@ void keyPressed() {
     case '-':
       playersRendered--;
       break;
+  }
+}
+
+/* Generates the number of moves allowed to get to the next apple for each snake length. */
+void initialiseAllowedMoves() {
+  for (int i = 0; i < allowedMoves.length; i++) {
+    allowedMoves[i] = (int) (200 * (Math.log(i) / Math.log(3)) + 300);
   }
 }

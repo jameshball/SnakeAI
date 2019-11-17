@@ -12,8 +12,16 @@ public class Main {
   static float mutationRate = 0.02f;
   static List<Float> maxScore = new ArrayList<>();
   static List<Float> avgScore = new ArrayList<>();
+  /* Stores the number of moves a snake is allowed to take to get an apple, given its current length.
+   i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
+   length 5. */
+  static int[] allowedMoves = new int[gridX * gridY];
 
   public static void main(String[] args) {
+    for (int i = 0; i < allowedMoves.length; i++) {
+      allowedMoves[i] = (int) (200 * (Math.log(i) / Math.log(3)) + 300);
+    }
+
     Population pop = new Population();
     while (true) {
       pop.update();
