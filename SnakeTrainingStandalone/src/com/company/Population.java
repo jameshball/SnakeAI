@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import java.io.*;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import static com.company.HelperClass.random;
@@ -69,7 +70,8 @@ class Population {
     avgScore.add(currentAvg);
     maxScore.add(currentMax);
 
-    System.out.println("Gen: " + gen + '\t' + "Max: " + currentMax + '\t' + "Avg: " + currentAvg);
+    System.out.println(String.format("Gen: %1$s\tMax: %2$s\tAvg: %3$s\tTime: %4$s", gen, currentMax,
+        currentAvg, LocalDateTime.now().toLocalTime()));
     gen++;
 
     players = nextGen;
