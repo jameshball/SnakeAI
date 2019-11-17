@@ -13,9 +13,21 @@ public class Main {
   static List<Float> maxScore = new ArrayList<>();
   static List<Float> avgScore = new ArrayList<>();
   /* Stores the number of moves a snake is allowed to take to get an apple, given its current length.
-   i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
-   length 5. */
+  i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
+  length 5. */
   static int[] allowedMoves = new int[gridX * gridY];
+  /* Adds the results of looking in eight directions around the snake to the vision array. */
+  static PVector[] directions =
+      new PVector[] {
+        new PVector(0, 1),
+        new PVector(1, 1),
+        new PVector(1, 0),
+        new PVector(1, -1),
+        new PVector(0, -1),
+        new PVector(-1, -1),
+        new PVector(-1, 0),
+        new PVector(-1, 1)
+      };
 
   public static void main(String[] args) {
     for (int i = 0; i < allowedMoves.length; i++) {

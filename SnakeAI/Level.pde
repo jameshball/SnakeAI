@@ -163,11 +163,7 @@ class Level {
   diagonals). This forms as the input to the player's neural network. */ 
   float[] vision() {
     ArrayList<Float> vision = new ArrayList<Float>();
-    
-    /* Adds the results of looking in eight directions around the snake to the vision array. */
-    PVector[] directions = new PVector[] { new PVector(0, 1), new PVector(1, 1), new PVector(1, 0), new PVector(1, -1),
-                                           new PVector(0, -1), new PVector(-1, -1), new PVector(-1, 0), new PVector(-1, 1)};
-                                           
+                               
     for (int i = 0; i < directions.length; i++) {
       vision.addAll(snakeLook(directions[i]));
     }

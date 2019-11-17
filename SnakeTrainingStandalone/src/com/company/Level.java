@@ -39,7 +39,7 @@ class Level {
     int randomFreeSpace = (int) random(emptyGridSpaces);
     int emptySpaceCount = 0;
 
-    for(int i = 0; i < gridX; i++) {
+    for (int i = 0; i < gridX; i++) {
       for (int j = 0; j < gridY; j++) {
         if (grid[i][j] == EMPTY) {
           emptySpaceCount++;
@@ -135,19 +135,6 @@ class Level {
   and all diagonals). This forms as the input to the player's neural network. */
   float[] vision() {
     ArrayList<Float> vision = new ArrayList<>();
-
-    /* Adds the results of looking in eight directions around the snake to the vision array. */
-    PVector[] directions =
-        new PVector[] {
-          new PVector(0, 1),
-          new PVector(1, 1),
-          new PVector(1, 0),
-          new PVector(1, -1),
-          new PVector(0, -1),
-          new PVector(-1, -1),
-          new PVector(-1, 0),
-          new PVector(-1, 1)
-        };
 
     for (PVector direction : directions) {
       vision.addAll(snakeLook(direction));

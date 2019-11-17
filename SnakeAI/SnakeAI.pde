@@ -18,6 +18,9 @@ int gridY = 40;
    i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
    length 5. */
 int[] allowedMoves = new int[gridX * gridY];
+/* The 8 relative directions from the snake's head. */
+final PVector[] directions = new PVector[] { new PVector(0, 1), new PVector(1, 1), new PVector(1, 0), new PVector(1, -1),
+                                           new PVector(0, -1), new PVector(-1, -1), new PVector(-1, 0), new PVector(-1, 1)};
 
 int playersRendered = 10;
 int gen = 0;
