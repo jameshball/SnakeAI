@@ -49,7 +49,7 @@ void setup() {
   maxScore = new Graph("Generation", "Max. score", color(0));
   avgScore = new Graph("Generation", "Avg. score", color(255, 0, 0));
   /* Loads the last-run program from a file. */
-  //pop.load("/data/program.json");
+  pop.load("/data/program.json");
 }
 
 /* The draw method is executed every frame. This is the main functionality of the program. */

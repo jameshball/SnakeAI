@@ -5,8 +5,7 @@ class Player {
   Level level;
 
   Player() {
-    nn = new NeuralNetwork();
-    level = new Level();
+    this(new NeuralNetwork());
   }
 
   Player(NeuralNetwork nn) {

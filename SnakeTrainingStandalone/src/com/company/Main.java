@@ -16,7 +16,7 @@ public class Main {
   /* Stores the number of moves a snake is allowed to take to get an apple, given its current length.
   i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
   length 5. */
-  static int[] allowedMoves = new int[gridX * gridY];
+  static int[] allowedMoves = new int[gridX * gridY + 1];
   /* Adds the results of looking in eight directions around the snake to the vision array. */
   static PVector[] directions =
       new PVector[] {
