@@ -22,8 +22,8 @@ As the name implies, this is a standalone version of SnakeAI that is used purely
 ### Libraries
 SnakeTrainingStandalone imports the following libraries:
 
-[EJML](https://sourceforge.net/projects/ejml/files/) (Specifically, ejml-simple, ejml-ddense, and ejml-core)
-[JSON-java](https://github.com/stleary/JSON-java)
+* [EJML](https://sourceforge.net/projects/ejml/files/) (Specifically, ejml-simple, ejml-ddense, and ejml-core)
+* [JSON-java](https://github.com/stleary/JSON-java)
 
 ## SnakeHuman
 This is essentially just Snake. It's human-playable and uses similar code to SnakeAI to control snakes. This was created before SnakeAI so I had a base-game to implement a genetic algorithm into.
