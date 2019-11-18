@@ -21,6 +21,7 @@ As the name implies, this is a standalone version of SnakeAI that is used purely
 
 ### Libraries
 SnakeTrainingStandalone imports the following libraries:
+
 [EJML](https://sourceforge.net/projects/ejml/files/) (Specifically, ejml-simple, ejml-ddense, and ejml-core)
 [JSON-java](https://github.com/stleary/JSON-java)
 
