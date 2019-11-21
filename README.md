@@ -16,8 +16,14 @@ Displaying a sample of current snakes (number of snakes shown can be changed by 
 
 And also displaying helpful statistics about the snakes, such as the average score of the last generation, the number of dead snakes, the time since start, the generation number etc.
 
-## SnakeHuman
-This is essentially just Snake. It's human-playable and uses similar code to SnakeAI to control snakes. This was created before SnakeAI so I had a base-game to implement a genetic algorithm into.
-
 ## SnakeTrainingStandalone
 As the name implies, this is a standalone version of SnakeAI that is used purely for training the snakes and generating files that can then be loaded into SnakeAI. It makes use of concurrent processing to train snakes far quicker than SnakeAI, but it only has a CLI. After each generation, the current program-state is saved to /data/program.json which can then be moved to SnakeAI/data/program.json and loaded into the SnakeAI program.
+
+### Libraries
+SnakeTrainingStandalone imports the following libraries:
+
+* [EJML](https://sourceforge.net/projects/ejml/files/) (Specifically, ejml-simple, ejml-ddense, and ejml-core)
+* [JSON-java](https://github.com/stleary/JSON-java)
+
+## SnakeHuman
+This is essentially just Snake. It's human-playable and uses similar code to SnakeAI to control snakes. This was created before SnakeAI so I had a base-game to implement a genetic algorithm into.
