@@ -17,7 +17,7 @@ int gridY = 40;
 /* Stores the number of moves a snake is allowed to take to get an apple, given its current length. 
    i.e. allowedMoves[5] returns the number of moves allowed to get the next apple when the snake is
    length 5. */
-int[] allowedMoves = new int[gridX * gridY];
+int[] allowedMoves = new int[gridX * gridY + 1];
 /* The 8 relative directions from the snake's head. */
 final PVector[] directions = new PVector[] { new PVector(0, 1), new PVector(1, 1), new PVector(1, 0), new PVector(1, -1),
                                            new PVector(0, -1), new PVector(-1, -1), new PVector(-1, 0), new PVector(-1, 1)};
