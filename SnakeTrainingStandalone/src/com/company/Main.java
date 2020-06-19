@@ -30,12 +30,13 @@ public class Main {
         new PVector(-1, 1)
       };
 
-  public static void main(String[] args) throws FileNotFoundException {
+  public static void main(String[] args) {
     for (int i = 0; i < allowedMoves.length; i++) {
       allowedMoves[i] = (int) (200 * (Math.log(i) / Math.log(3)) + 300);
     }
 
-    Population pop = new Population("/data/program.json");
+    //Population pop = new Population("/data/program.json");
+    Population pop = new Population();
 
     while (true) {
       pop.update();
