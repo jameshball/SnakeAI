@@ -5,6 +5,10 @@
 
 typedef struct matrix_t matrix_t;
 
+matrix_t *matrix_from_arr(int rows, int cols, float *arr);
+
+matrix_t *matrix_ifrom_arr(int rows, int cols, float *arr);
+
 matrix_t *init_matrix(int rows, int cols);
 
 matrix_t *init_random(int rows, int cols);

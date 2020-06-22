@@ -83,16 +83,6 @@ int asserts_ran = 0, asserts_failed = 0, tests_ran = 0, tests_failed = 0;
     }                                                                  \
   } while (0)
 
-static matrix_t *matrix_from_arr(int row, int col, float *arr) {
-  matrix_t *m = init_matrix(row, col);
-  for (int i = 0; i < rows(m); i++) {
-    for (int j = 0; j < cols(m); j++) {
-      matrix_set(m, i, j, arr[j + i * col]);
-    }
-  }
-  return m;
-}
-
 #define matrix_verify(m, arr)\
   do{\
       matrix_t *exp = matrix_from_arr(rows(m), cols(m), arr); \

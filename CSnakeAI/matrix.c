@@ -1,6 +1,7 @@
 #ifndef __CUDACC__
 
 #include "matrix.h"
+#include "common.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -18,7 +19,9 @@ inline int cols(matrix_t *m) { return m->cols; }
 
 static matrix_t *__alloc_matrix(int rows, int cols) {
   float *data = malloc(rows * cols * sizeof(float));
+  null_check(data);
   matrix_t *m = malloc(sizeof(matrix_t));
+  null_check(m);
   m->rows = rows;
   m->cols = cols;
   m->data = data;
@@ -26,14 +29,41 @@ static matrix_t *__alloc_matrix(int rows, int cols) {
 }
 
 void destroy_matrix(matrix_t *m) {
-  assert(m != NULL);
-  free(m->data);
-  free(m);
+  if (!m) {
+    free(m->data);
+    free(m);
+  }
+}
+
+matrix_t *matrix_from_arr(int row, int col, float *arr) {
+  matrix_t *m = init_matrix(row, col);
+  for (int i = 0; i < rows(m); i++) {
+    for (int j = 0; j < cols(m); j++) {
+      matrix_set(m, i, j, arr[j + i * col]);
+    }
+  }
+  return m;
+}
+
+// not as safe as above, but faster
+matrix_t *matrix_ifrom_arr(int row, int col, float *arr) {
+  assert(arr);
+
+  matrix_t *m = malloc(sizeof(matrix_t));
+  null_check(m);
+
+  m->rows = row;
+  m->cols = col;
+  m->data = arr;
+
+  return m;
 }
 
 matrix_t *init_matrix(int rows, int cols) {
   float *data = calloc(rows * cols, sizeof(float));
+  null_check(data);
   matrix_t *m = malloc(sizeof(matrix_t));
+  null_check(m);
   m->rows = rows;
   m->cols = cols;
   m->data = data;
