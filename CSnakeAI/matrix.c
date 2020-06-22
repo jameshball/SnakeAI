@@ -46,24 +46,35 @@ matrix_t *init_matrix(int rows, int cols) {
     op;                               \
   }
 
-void matrix_fill(matrix_t *m, float x) { ELEM_WISE(m, i, m->data[i] = x); }
+float rand_float(float min, float max) {
+  float scale = rand() / (float) RAND_MAX;
+  return min + scale * (max - min);
+}
+
+matrix_t *matrix_fill(matrix_t *m, float x) {
+  ELEM_WISE(m, i, m->data[i] = x);
+  return m;
+}
 
 matrix_t *init_random(int rows, int cols) {
   matrix_t *m = __alloc_matrix(rows, cols);
-  ELEM_WISE(m, i, m->data[i] = (float)rand() / (float)RAND_MAX;);
+  ELEM_WISE(m, i, m->data[i] = rand_float(-1, 1));
   return m;
 }
 
 #define OUTER_BLOCK_SIZE 256
 #define INNER_BLOCK_SIZE 2048
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define ELEM(m, row, col) ((m)->data[(col) + (row) * (m)->cols])
 
 inline float matrix_get(matrix_t *m, int row, int col) {
   return ELEM(m, row, col);
 }
-inline void matrix_set(matrix_t *m, int row, int col, float val) {
+
+matrix_t *matrix_set(matrix_t *m, int row, int col, float val) {
   ELEM(m, row, col) = val;
+  return m;
 }
 
 matrix_t *matrix_mul(matrix_t *m1, matrix_t *m2) {
@@ -93,7 +104,7 @@ matrix_t *matrix_mul(matrix_t *m1, matrix_t *m2) {
   return ret;
 }
 
-void matrix_imul(matrix_t *m1, matrix_t *m2){
+matrix_t *matrix_imul(matrix_t *m1, matrix_t *m2){
   // There isn't a good way to do in-place (or low allocation)
   // matrix multiplication
   matrix_t *ret = matrix_mul(m1, m2);
@@ -102,6 +113,57 @@ void matrix_imul(matrix_t *m1, matrix_t *m2){
   m1->cols = ret->cols;
   m1->data = ret->data;
   free(ret); // don't free data
+  return m1;
+}
+
+matrix_t *matrix_iclip(matrix_t *m, float floor, float ceiling) {
+  ELEM_WISE(
+      m, i,
+      if (m->data[i] < floor) {
+        m->data[i] = floor;
+      } else if (m->data[i] > ceiling) { m->data[i] = ceiling; });
+  return m;
+}
+
+#define RANGE 12
+
+// approximation of random gaussian
+static float random_gaussian() {
+  float sum = 0;
+  for (int i = 0; i < RANGE; i++) {
+    sum += rand_float(0, 1);
+  }
+  return sum - RANGE / 2;
+}
+
+matrix_t *matrix_imutate(matrix_t *m, float mutation_rate) {
+  ELEM_WISE(m, i, 
+    if (rand_float(0, 1) < mutation_rate) {
+      m->data[i] = m->data[i] + random_gaussian() / 5.0;
+    });
+  return matrix_iclip(m, -1, 1); 
+}
+
+matrix_t *matrix_add_bias(matrix_t *m) {
+  assert(m->cols == 1);
+
+  matrix_t *ret = __alloc_matrix(m->rows + 1, 1);
+  memcpy(ret->data, m->data, m->rows * sizeof(float));
+  // sets bias node val
+  matrix_set(ret, ret->rows - 1, 0, 1);
+
+  return ret;
+}
+
+matrix_t *matrix_iadd_bias(matrix_t *m) {
+  assert(m->cols == 1);
+
+  m->data = realloc(m->data, (m->rows + 1) * sizeof(float));
+  m->rows += 1;
+  // sets bias node val
+  matrix_set(m, m->rows - 1, 0, 1);
+
+  return m;
 }
 
 #define ROW(m, i) ELEM(m, i, 0)
@@ -117,7 +179,7 @@ matrix_t *horizontal_stack(matrix_t *m1, matrix_t *m2) {
   return ret;
 }
 
-void ihorizontal_stack(matrix_t *m1, matrix_t *m2) {
+matrix_t *ihorizontal_stack(matrix_t *m1, matrix_t *m2) {
   assert(m1->rows == m2->rows);
   m1->data = realloc(m1->data, (size(m1) + size(m2)) * sizeof(float));
 
@@ -132,6 +194,8 @@ void ihorizontal_stack(matrix_t *m1, matrix_t *m2) {
   for (int i = 0; i < m1->rows; i++) {
     memcpy(&ELEM(m1, i, orig_cols), &ROW(m2, i), m2->cols * sizeof(float));
   }
+
+  return m1;
 }
 
 matrix_t *vertical_stack(matrix_t *m1, matrix_t *m2) {
@@ -144,13 +208,15 @@ matrix_t *vertical_stack(matrix_t *m1, matrix_t *m2) {
   return ret;
 }
 
-void ivertical_stack(matrix_t *m1, matrix_t *m2) {
+matrix_t *ivertical_stack(matrix_t *m1, matrix_t *m2) {
   assert(m1->cols == m2->cols);
 
   int new_rows = m1->rows + m2->rows;
   m1->data = realloc(m1->data, (size(m1) + size(m2)) * sizeof(float));
   memcpy(&m1->data[size(m1)], m2->data, size(m2) * sizeof(float));
   m1->rows = new_rows;
+
+  return m1;
 }
 
 matrix_t *matrix_elem_op(matrix_t *m1, matrix_t *m2, OP op) {
@@ -173,7 +239,7 @@ matrix_t *matrix_elem_op(matrix_t *m1, matrix_t *m2, OP op) {
   return ret;
 }
 
-void matrix_elem_iop(matrix_t *m1, matrix_t *m2, OP op) {
+matrix_t *matrix_elem_iop(matrix_t *m1, matrix_t *m2, OP op) {
   assert(m1->rows == m2->rows);
   assert(m1->cols == m2->cols);
 
@@ -188,6 +254,19 @@ void matrix_elem_iop(matrix_t *m1, matrix_t *m2, OP op) {
       ELEM_WISE(m1, i, m1->data[i] *= m2->data[i]);
       break;
   }
+
+  return m1;
+}
+
+matrix_t *matrix_relu(matrix_t *m) {
+  matrix_t *ret = __alloc_matrix(m->rows, m->cols);
+  ELEM_WISE(m, i, ret->data[i] = MAX(0, m->data[i]));
+  return ret;
+}
+
+matrix_t *matrix_irelu(matrix_t *m) {
+  ELEM_WISE(m, i, m->data[i] = MAX(0, m->data[i]));
+  return m;
 }
 
 matrix_t *matrix_add_const(matrix_t *m, float value) {
@@ -196,8 +275,9 @@ matrix_t *matrix_add_const(matrix_t *m, float value) {
   return ret;
 }
 
-void matrix_iadd_const(matrix_t *m, float value) {
+matrix_t *matrix_iadd_const(matrix_t *m, float value) {
   ELEM_WISE(m, i, m->data[i] += value);
+  return m;
 }
 
 matrix_t *matrix_scale(matrix_t *m, float scalar) {
@@ -206,16 +286,9 @@ matrix_t *matrix_scale(matrix_t *m, float scalar) {
   return ret;
 }
 
-void matrix_iscale(matrix_t *m, float scalar) {
+matrix_t *matrix_iscale(matrix_t *m, float scalar) {
   ELEM_WISE(m, i, m->data[i] *= scalar);
-}
-
-void matrix_iclip(matrix_t *m, float floor, float ceiling) {
-  ELEM_WISE(
-      m, i,
-      if (m->data[i] < floor) {
-        m->data[i] = floor;
-      } else if (m->data[i] > ceiling) { m->data[i] = ceiling; });
+  return m;
 }
 
 void pretty_print(matrix_t *m) {

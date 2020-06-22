@@ -172,6 +172,27 @@ void test_matrix_mul() {
   destroy_matrices(3, m4,m5,m45_act);
 }
 
+void test_add_bias() {
+  float a1[3] = {
+    1,
+    2,
+    3
+  };
+  matrix_t *m1 = matrix_from_arr(3, 1, a1);
+
+  float a1_bias[4] = {
+    1,
+    2,
+    3,
+    1
+  };
+  matrix_t *m1_bias = matrix_add_bias(m1);
+  matrix_verify(m1_bias, a1_bias);
+  matrix_verify(matrix_iadd_bias(m1), a1_bias);
+
+  destroy_matrices(2, m1, m1_bias);
+}
+
 void test_horizontal_stack() {
   float a1[9] = {
     1, 0, 0, 
@@ -235,6 +256,27 @@ void test_vertical_stack() {
   destroy_matrices(3,m1,m2,m3);
 }
 
+void test_relu() {
+  float a1[9] = {
+    1, 2, 3, 
+    -1, -2, -3, 
+    7, 8, 9
+  };
+  matrix_t *m1 = matrix_from_arr(3, 3, a1);
+
+  float a1_relu[9] = {
+    1, 2, 3,
+    0, 0, 0,
+    7, 8, 9
+  };
+  matrix_t *m1_relu = matrix_relu(m1);
+  matrix_verify(m1_relu, a1_relu);
+
+  matrix_verify(matrix_irelu(m1), a1_relu);
+
+  destroy_matrices(2, m1, m1_relu);
+}
+
 void test_add_const(){
   float a1[9] = {
     1, 2, 3, 
@@ -267,6 +309,7 @@ void run() {
   run_test(test_horizontal_stack);
   run_test(test_vertical_stack);
   run_test(test_add_const);
+
   if (tests_failed == 0) {
     printf(
         "********************\n"
