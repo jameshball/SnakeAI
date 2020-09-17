@@ -28,40 +28,6 @@ import java.util.Random;
  */
 class Matrix
 {
-  
-
-  public static void main(String[] args)
-  {
-    JCublas2.setExceptionsEnabled(true);
-    JCuda.setExceptionsEnabled(true);
-    testSgemmBatched(100, 200);
-  }
-
-  public static boolean testSgemmBatched(int b, int n)
-  {
-    System.out.println("Testing Sgemm with " + b + " batches of size " + n);
-
-    float alpha = 0.3f;
-    float beta = 0.7f;
-    int nn = n * n;
-
-    float h_A[][] = new float[b][];
-    float h_B[][] = new float[b][];
-    float h_C[][] = new float[b][];
-    float h_C_ref[][] = new float[b][];
-    for (int i = 0; i < b; i++)
-    {
-      h_A[i] = createRandomFloatData(nn);
-      h_B[i] = createRandomFloatData(nn);
-      h_C[i] = createRandomFloatData(nn);
-      h_C_ref[i] = h_C[i].clone();
-    }
-
-    System.out.println("Performing Sgemm with JCublas2...");
-    sgemmBatchedJCublas2(n, alpha, h_A, h_B, beta, h_C);
-    return true;
-  }
-
   static void sgemmBatchedJCublas2(int m, int n, int k, float alpha,
                                    float h_A[][], float h_B[][], float beta, float h_C[][])
   {
