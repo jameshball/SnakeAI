@@ -29,12 +29,23 @@ class Population {
 
   /* Executes every frame to update the game-state and checks if the generation has ended yet. */
   void update() {
+    NeuralNetwork.feedForward(getInputs(), players);
     Arrays.stream(players).parallel().forEach(Player::update);
 
     /* If all snakes have died, create the next generation of players. */
     if (isAllDead()) {
       naturalSelection();
     }
+  }
+
+  private float[][] getInputs() {
+    float[][] inputs = new float[players.length][];
+
+    for (int i = 0; i < players.length; i++) {
+      inputs[i] = players[i].level.vision();
+    }
+
+    return inputs;
   }
 
   /* Returns true is all snakes have died, false otherwise. */
@@ -61,7 +72,7 @@ class Population {
 
     for (int i = 1; i < populationSize; i++) {
       /* Create each player in the new generation by performing selection, crossover and mutation. */
-      nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights());
+      nextGen[i] = new Player(NeuralNetwork.mutateWeights(uniformCrossover(selectParent(), selectParent())));
     }
 
     float currentAvg = scoreSum() / populationSize;
@@ -79,20 +90,18 @@ class Population {
   }
 
   /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimics breeding. */
-  private NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
+  private float[][] uniformCrossover(float[][] parent1, float[][] parent2) {
     /* Normally, I should compare each NN to check their dimensions are the same, but as all NNs in this
     program are created with exactly the same dimensions, this isn't an issue. */
-    NeuralNetwork child = new NeuralNetwork();
+    float[][] child = NeuralNetwork.initialiseNeuralNetwork();
 
-    for (int i = 0; i < parent1.weightMatrices.length; i++) {
-      for (int j = 0; j < parent1.weightMatrices[i].numRows(); j++) {
-        for (int k = 0; k < parent1.weightMatrices[i].numCols(); k++) {
-          /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
-          if (random(1) > 0.5) {
-            child.weightMatrices[i].set(j, k, parent1.weightMatrices[i].get(j, k));
-          } else {
-            child.weightMatrices[i].set(j, k, parent2.weightMatrices[i].get(j, k));
-          }
+    for (int i = 0; i < parent1.length; i++) {
+      for (int j = 0; j < parent1[i].length; j++) {
+        /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
+        if (random(1) > 0.5) {
+          child[i][j] = parent1[i][j];
+        } else {
+          child[i][j] = parent2[i][j];
         }
       }
     }
@@ -124,7 +133,7 @@ class Population {
 
   /* Randomly selects a NN from a player in the population based on how well they performed. It is a
   random selection, but players that perform better are more likely to be chosen. */
-  private NeuralNetwork selectParent() {
+  private float[][] selectParent() {
     float threshold = random(fitnessSum());
     float total = 0;
 
@@ -172,7 +181,7 @@ class Population {
 
     for (int i = 0; i < players.length; i++) {
       /* Appends all the player's neural networks to the neuralNetwork JSONArray. */
-      neuralNetworks.put(i, players[i].nn.save());
+      neuralNetworks.put(i, NeuralNetwork.save(players[i].nn));
     }
 
     for (int i = 0; i < maxScore.size(); i++) {
@@ -221,7 +230,7 @@ class Population {
 
     for (int i = 0; i < populationSize; i++) {
       /* Initialises new Player objects using the neural network JSONObjects in neuralNetworks. */
-      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)));
+      players[i] = new Player(NeuralNetwork.load(neuralNetworks.getJSONObject(i)));
     }
 
     /* Loads all graph data. */

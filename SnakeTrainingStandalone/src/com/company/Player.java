@@ -1,14 +1,19 @@
 package com.company;
+
+import static com.company.Main.networkStructure;
+
 /* This class manages the level, along with the neural network that controls the snake. */
 class Player {
-  NeuralNetwork nn;
+  float[][] nn;
+  float[] output;
   Level level;
 
   Player() {
-    this(new NeuralNetwork());
+    nn = NeuralNetwork.initialiseNeuralNetwork();
+    level = new Level();
   }
 
-  Player(NeuralNetwork nn) {
+  Player(float[][] nn) {
     this.nn = nn;
     level = new Level();
   }
@@ -16,8 +21,6 @@ class Player {
   /* Uses the NN to look at the current state of the game and then decide the next move to make. */
   void update() {
     if (isAlive()) {
-      float[] output = nn.feedForward(level.vision());
-
       /* This code looks at the strongest output from the NN to decide what move to make. */
       float max = output[0];
       int maxIndex = 0;
