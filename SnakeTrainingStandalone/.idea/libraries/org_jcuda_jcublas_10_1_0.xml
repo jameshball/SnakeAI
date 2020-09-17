@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="org.jcuda:jcublas:10.1.0" type="repository">
+    <properties maven-id="org.jcuda:jcublas:10.1.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jcublas-10.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcuda-10.1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jcublas-natives-10.1.0-windows-x86_64.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
