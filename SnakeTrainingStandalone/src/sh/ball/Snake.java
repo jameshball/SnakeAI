@@ -1,10 +1,8 @@
-package com.company;
+package sh.ball;
 
 import java.util.ArrayList;
 
-import static com.company.HelperClass.random;
-import static com.company.Main.gridX;
-import static com.company.Main.gridY;
+import static sh.ball.HelperClass.random;
 
 /* Snake holds all the information about the Snake, including its current position, location of all parts
 of its tail and whether it is still alive. */
@@ -16,7 +14,7 @@ class Snake {
 
   Snake() {
     /* This resets the snake's head to a random position at least 1 square away from the edges. */
-    pos = new PVector((int) random(gridX - 1) + 1, (int) random(gridY - 1) + 1);
+    pos = new PVector((int) random(Main.gridX - 1) + 1, (int) random(Main.gridY - 1) + 1);
     dead = false;
     body = new ArrayList<PVector>();
     body.add(new PVector(pos.x, pos.y));
@@ -30,7 +28,7 @@ class Snake {
   void update() {
     pos.add(direction);
 
-    if (isTail(pos) || pos.x < 0 || pos.x >= gridX || pos.y < 0 || pos.y >= gridY) {
+    if (isTail(pos) || pos.x < 0 || pos.x >= Main.gridX || pos.y < 0 || pos.y >= Main.gridY) {
       dead = true;
     }
   }

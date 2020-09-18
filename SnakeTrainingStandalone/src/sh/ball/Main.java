@@ -1,4 +1,4 @@
-package com.company;
+package sh.ball;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.company;
+package sh.ball;
 
 import java.util.Random;
 

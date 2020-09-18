@@ -1,12 +1,10 @@
-package com.company;
+package sh.ball;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ejml.simple.SimpleMatrix;
 
-import static com.company.HelperClass.random;
-import static com.company.HelperClass.randomGaussian;
-import static com.company.Main.networkStructure;
+import static sh.ball.HelperClass.random;
 import static java.lang.Math.exp;
 
 /* This class is responsible for managing and creating neural networks for the Player class. */
@@ -14,13 +12,13 @@ class NeuralNetwork {
   SimpleMatrix[] weightMatrices;
 
   NeuralNetwork() {
-    weightMatrices = new SimpleMatrix[networkStructure.length - 1];
+    weightMatrices = new SimpleMatrix[Main.networkStructure.length - 1];
 
     /* Initialises n-1 weight matrices where n is the number of layers in the network. */
     for (int i = 0; i < weightMatrices.length; i++) {
       /* This initialises a weight matrix, considering the extra bias node. */
-      weightMatrices[i] = SimpleMatrix.random_DDRM(networkStructure[i + 1],
-          networkStructure[i] + 1, -1, 1, HelperClass.rnd);
+      weightMatrices[i] = SimpleMatrix.random_DDRM(Main.networkStructure[i + 1],
+          Main.networkStructure[i] + 1, -1, 1, HelperClass.rnd);
     }
   }
 
@@ -62,7 +60,7 @@ class NeuralNetwork {
       }
     }
 
-    for (int i = 0; i < networkStructure.length - 1; i++) {
+    for (int i = 0; i < Main.networkStructure.length - 1; i++) {
       for (int j = 0; j < currentLayers.length; j++) {
         if (players[j].isAlive()) {
           currentLayers[j] = applyReLu(players[j].nn.weightMatrices[i].mult(addBias(currentLayers[j])));
@@ -148,12 +146,12 @@ class NeuralNetwork {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
         /* The mutationRate hyper-parameter in the Main class determines how often this occurs. */
-        if (random(1) < Main.mutationRate) {
+        if (HelperClass.random(1) < Main.mutationRate) {
           /* randomGaussian() generates a random number using normalized Gaussian distribution. Dividing
           by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
           positive impact. */
           double cellValue = m.get(i, j);
-          m.set(i, j, cellValue + randomGaussian() / 5);
+          m.set(i, j, cellValue + HelperClass.randomGaussian() / 5);
 
           /* If the weight falls outside the -1.0 to 1.0 range after mutation, limit it to this range. */
           if (cellValue > 1) {
@@ -180,11 +178,11 @@ class NeuralNetwork {
   JSONObject save() {
     JSONObject neuralNet = new JSONObject();
 
-    neuralNet.put("layerCount", networkStructure.length);
+    neuralNet.put("layerCount", Main.networkStructure.length);
     neuralNet.put("matrixCount", weightMatrices.length);
 
-    for (int i = 0; i < networkStructure.length; i++) {
-      neuralNet.put("length " + i, networkStructure[i]);
+    for (int i = 0; i < Main.networkStructure.length; i++) {
+      neuralNet.put("length " + i, Main.networkStructure[i]);
     }
 
     for (int i = 0; i < weightMatrices.length; i++) {

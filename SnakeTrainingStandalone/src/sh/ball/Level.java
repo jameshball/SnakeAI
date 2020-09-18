@@ -1,11 +1,11 @@
-package com.company;
+package sh.ball;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.company.HelperClass.*;
-import static com.company.Main.*;
+import static sh.ball.HelperClass.*;
+import static sh.ball.Main.*;
 
 /* The Level class holds all details about the current state of the game, including the Snake,
 Apple and score. It has the functionality to update the grid each frame. */

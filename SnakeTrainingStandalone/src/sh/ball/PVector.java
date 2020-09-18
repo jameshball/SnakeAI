@@ -1,4 +1,4 @@
-package com.company;
+package sh.ball;
 
 public class PVector {
     float x;

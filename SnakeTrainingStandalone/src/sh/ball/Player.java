@@ -1,4 +1,4 @@
-package com.company;
+package sh.ball;
 /* This class manages the level, along with the neural network that controls the snake. */
 class Player {
   NeuralNetwork nn;

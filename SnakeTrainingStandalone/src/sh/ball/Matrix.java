@@ -1,4 +1,4 @@
-package com.company;
+package sh.ball;
 
 import static jcuda.jcublas.JCublas2.cublasCreate;
 import static jcuda.jcublas.JCublas2.cublasDestroy;

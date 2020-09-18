@@ -1,4 +1,4 @@
-package com.company;
+package sh.ball;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -8,8 +8,8 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import static com.company.HelperClass.random;
-import static com.company.Main.*;
+import static sh.ball.HelperClass.random;
+import static sh.ball.Main.*;
 
 class Population {
   private Player[] players;
