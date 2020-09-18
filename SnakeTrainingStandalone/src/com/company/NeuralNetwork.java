@@ -46,32 +46,39 @@ class NeuralNetwork {
   }
 
   /* Feeds an input array through the NN to return the output layer. */
-  float[] feedForward(float[] arr) throws IllegalArgumentException {
-    float[][] floatMatrix = new float[arr.length][];
+  public static void feedForward(float[][] inputs, Player[] players) throws IllegalArgumentException {
+    SimpleMatrix[] currentLayers = new SimpleMatrix[inputs.length];
 
-    for (int i = 0; i < arr.length; i++) {
-      floatMatrix[i] = new float[1];
-      floatMatrix[i][0] = arr[i];
+    for (int i = 0; i < players.length; i++) {
+      if (players[i].isAlive()) {
+        float[][] floatMatrix = new float[inputs[i].length][];
+
+        for (int j = 0; j < floatMatrix.length; j++) {
+          floatMatrix[j] = new float[1];
+          floatMatrix[j][0] = inputs[i][j];
+        }
+
+        currentLayers[i] = new SimpleMatrix(floatMatrix);
+      }
     }
 
-    /* Checks to see the arr parameter is the correct length. */
-    if (networkStructure[0] == arr.length) {
-      SimpleMatrix currentLayer = new SimpleMatrix(floatMatrix);
-
-      /* Works through the NN and repeatedly calculates the next layer by multiplying the weight matrix
-      by the current layer and applying the activation function. */
-      for (int i = 0; i < weightMatrices.length; i++) {
-        currentLayer = applyReLu(weightMatrices[i].mult(addBias(currentLayer)));
+    for (int i = 0; i < networkStructure.length - 1; i++) {
+      for (int j = 0; j < currentLayers.length; j++) {
+        if (players[j].isAlive()) {
+          currentLayers[j] = applyReLu(players[j].nn.weightMatrices[i].mult(addBias(currentLayers[j])));
+        }
       }
+    }
 
-      return toArray(currentLayer);
-    } else {
-      throw new IllegalArgumentException();
+    for (int i = 0; i < players.length; i++) {
+      if (players[i].isAlive()) {
+        players[i].output = toArray(currentLayers[i]);
+      }
     }
   }
 
   /* Converts the matrix data to a 1D array of length rows*cols. */
-  float[] toArray(SimpleMatrix m) {
+  static float[] toArray(SimpleMatrix m) {
     int rows = m.numRows();
     int cols = m.numCols();
 
@@ -87,7 +94,7 @@ class NeuralNetwork {
   }
 
   /* This adds a bias node (node with a constant value of 1.0) to a one-column matrix. */
-  SimpleMatrix addBias(SimpleMatrix m) throws IllegalArgumentException {
+  static SimpleMatrix addBias(SimpleMatrix m) throws IllegalArgumentException {
     SimpleMatrix n;
     int rows = m.numRows();
     int cols = m.numCols();
@@ -111,7 +118,7 @@ class NeuralNetwork {
   }
 
   /* Applies the ReLu function to all values in the matrix and returns it. */
-  SimpleMatrix applyReLu(SimpleMatrix m) {
+  static SimpleMatrix applyReLu(SimpleMatrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
         /* This is a simple max(0, data[i][j]) function. */

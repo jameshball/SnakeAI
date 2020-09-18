@@ -29,12 +29,25 @@ class Population {
 
   /* Executes every frame to update the game-state and checks if the generation has ended yet. */
   void update() {
+    NeuralNetwork.feedForward(getInputs(), players);
     Arrays.stream(players).parallel().forEach(Player::update);
 
     /* If all snakes have died, create the next generation of players. */
     if (isAllDead()) {
       naturalSelection();
     }
+  }
+
+  float[][] getInputs() {
+    float[][] inputs = new float[players.length][];
+
+    for (int i = 0; i < players.length; i++) {
+      if (players[i].isAlive()) {
+        inputs[i] = players[i].level.vision();
+      }
+    }
+
+    return inputs;
   }
 
   /* Returns true is all snakes have died, false otherwise. */
