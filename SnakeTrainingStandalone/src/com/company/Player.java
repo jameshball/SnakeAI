@@ -1,7 +1,5 @@
 package com.company;
 
-import static com.company.Main.networkStructure;
-
 /* This class manages the level, along with the neural network that controls the snake. */
 class Player {
   float[][] nn;

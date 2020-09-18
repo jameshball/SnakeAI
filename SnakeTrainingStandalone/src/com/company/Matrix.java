@@ -16,6 +16,7 @@ import jcuda.jcublas.cublasHandle;
 import jcuda.jcublas.cublasOperation;
 import jcuda.runtime.JCuda;
 
+import java.io.FileNotFoundException;
 import java.util.Random;
 
 /**
@@ -28,6 +29,40 @@ import java.util.Random;
  */
 class Matrix
 {
+  public static float[][] batchMatrixMultiplyCPU(int dim1, int dim2, int dim3, float alpha,
+                                                 float h_A[][], float h_B[][], float beta) {
+    int batches = h_A.length;
+    float[][] h_C = new float[batches][];
+
+    for (int batch = 0; batch < batches; batch++) {
+      float[] C = new float[dim1 * dim2];
+
+      for (int i = 0; i < dim1; i++) { // aRow
+        for (int j = 0; j < dim2; j++) { // bColumn
+          for (int k = 0; k < dim3; k++) { // aColumn
+            try {
+              C[i * dim1 + j] += h_A[batch][i * dim1 + k] * h_B[batch][k * dim3 + j];
+              System.out.println("hello");
+            } catch (Exception e) {
+              System.out.println(e.getMessage());
+              System.out.println("batch " + batch);
+              System.out.println(i * dim1 + j);
+              System.out.println(i * dim1 + k);
+              System.out.println(k * dim3 + j);
+              System.out.println("i: " + i + ", j: " + j + ", k: " + k);
+              System.out.println("dim1: " + dim1 + ", dim2: " + dim2 + ", dim3: " + dim3);
+              System.out.println("C.length: " + C.length + ", A.length: " + h_A[batch].length + ", B.length: " + h_B[batch].length);
+            }
+          }
+        }
+      }
+
+      h_C[batch] = C;
+    }
+
+    return h_C;
+  }
+
   public static float[][] batchMatrixMultiply(int m, int n, int k, float alpha,
                                               float h_A[][], float h_B[][], float beta)
   {

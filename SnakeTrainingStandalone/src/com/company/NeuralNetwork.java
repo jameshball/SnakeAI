@@ -53,7 +53,6 @@ class NeuralNetwork {
   /* Feeds an input array through the NN to return the output layer. */
   public static void feedForward(float[][] inputs, Player[] players) {
     float[][] h_B = inputs;
-    // Add one for bias node.
     int n = 1;
 
     /* Works through the NN and repeatedly calculates the next layer by multiplying the weight matrix
@@ -67,7 +66,14 @@ class NeuralNetwork {
         h_A[j] = players[j].nn[i];
       }
 
-      h_B = applyReLu(Matrix.batchMatrixMultiply(m, n, k, 1, h_A, addBias(h_B), 0));
+      addBias(h_B);
+      if (h_A[0].length != m * k || h_B[0].length != k * n) {
+        System.out.println("m: " + m + ". n: " + n + ". k: " + k);
+        System.out.println("A has " + h_A[0].length + " elements when it should have " + (m * k));
+        System.out.println("B has " + h_B[0].length + " elements when it should have " + (k * n));
+      }
+
+      h_B = applyReLu(Matrix.batchMatrixMultiplyCPU(m, n, k, 1, h_A, h_B, 0));
     }
 
     for (int i = 0; i < players.length; i++) {

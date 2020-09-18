@@ -145,7 +145,7 @@ class Population {
       }
     }
 
-    return null;
+    return players[HelperClass.rnd.nextInt(players.length)].nn;
   }
 
   /* Returns the index of the snake that is currently the longest. */
