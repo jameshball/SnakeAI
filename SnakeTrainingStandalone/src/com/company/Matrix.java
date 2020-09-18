@@ -37,22 +37,10 @@ class Matrix
     for (int batch = 0; batch < batches; batch++) {
       float[] C = new float[dim1 * dim2];
 
-      for (int i = 0; i < dim1; i++) { // aRow
-        for (int j = 0; j < dim2; j++) { // bColumn
-          for (int k = 0; k < dim3; k++) { // aColumn
-            try {
-              C[i * dim1 + j] += h_A[batch][i * dim1 + k] * h_B[batch][k * dim3 + j];
-              System.out.println("hello");
-            } catch (Exception e) {
-              System.out.println(e.getMessage());
-              System.out.println("batch " + batch);
-              System.out.println(i * dim1 + j);
-              System.out.println(i * dim1 + k);
-              System.out.println(k * dim3 + j);
-              System.out.println("i: " + i + ", j: " + j + ", k: " + k);
-              System.out.println("dim1: " + dim1 + ", dim2: " + dim2 + ", dim3: " + dim3);
-              System.out.println("C.length: " + C.length + ", A.length: " + h_A[batch].length + ", B.length: " + h_B[batch].length);
-            }
+      for (int i = 0; i < dim1; i++) {
+        for (int j = 0; j < dim2; j++) {
+          for (int k = 0; k < dim3; k++) {
+            C[i * dim2 + j] += h_A[batch][i * dim3 + k] * h_B[batch][j * dim3 + k];
           }
         }
       }
