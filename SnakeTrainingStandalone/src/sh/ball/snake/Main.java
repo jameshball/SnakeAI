@@ -2,6 +2,8 @@ package sh.ball.snake;
 
 import sh.ball.ai.Population;
 
+import java.io.FileNotFoundException;
+
 public class Main {
 
   private static final int POPULATION_COUNT = 500;
@@ -10,9 +12,13 @@ public class Main {
   static int GRID_X = 40;
   static int GRID_Y = 40;
 
-  public static void main(String[] args) {
-    //Population pop = new Population("/data/program.json");
-    Population pop = new Population(POPULATION_COUNT, NETWORK_STRUCTURE, new Level(GRID_X, GRID_Y));
+  public static void main(String[] args) throws FileNotFoundException {
+    Population pop;
+    if (args.length == 1) {
+      pop = new Population(args[0], new Level(GRID_X, GRID_Y));
+    } else {
+      pop = new Population(POPULATION_COUNT, NETWORK_STRUCTURE, new Level(GRID_X, GRID_Y));
+    }
 
     while (true) {
       pop.update();
