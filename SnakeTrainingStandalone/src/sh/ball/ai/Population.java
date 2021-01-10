@@ -47,12 +47,10 @@ public class Population {
 
   /* Executes every frame to update the game-state and checks if the generation has ended yet. */
   public void update() {
-    for (Player player : players) {
-      if (player.isAlive()) {
-        player.setOutput(player.neuralNetwork().feedForward(player.vision()));
-      }
-    }
-    Arrays.stream(players).parallel().forEach(Player::update);
+    Arrays.stream(players).parallel().filter(Player::isAlive).forEach(p -> {
+      p.setOutput(p.neuralNetwork().feedForward(p.vision()));
+      p.update();
+    });
 
     /* If all snakes have died, create the next generation of players. */
     if (isAllDead()) {
@@ -76,10 +74,9 @@ public class Population {
     generation's best shouldn't perform worse. */
     nextGen[0] = new Player(players[bestIndex].neuralNetwork(), state);
 
-    for (int i = 1; i < POPULATION_COUNT; i++) {
-      /* Create each player in the new generation by performing selection, crossover and mutation. */
-      nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights(), state);
-    }
+    IntStream.range(1, POPULATION_COUNT).parallel().forEach(i ->
+      nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights(), state)
+    );
 
     float currentAvg = scoreSum() / POPULATION_COUNT;
     float currentMax = players[bestIndex].score();
