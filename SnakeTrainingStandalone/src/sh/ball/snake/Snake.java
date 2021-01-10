@@ -1,10 +1,8 @@
 package sh.ball.snake;
 
-import sh.ball.ai.Population;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /* Snake holds all the information about the Snake, including its current position, location of all parts
 of its tail and whether it is still alive. */
@@ -23,7 +21,7 @@ public class Snake {
   public Snake(Level level) {
     this.level = level;
     /* This resets the snake's head to a random position at least 1 square away from the edges. */
-    this.head = new Vector2(Population.rnd.nextInt(level.width() - 1) + 1, Population.rnd.nextInt(level.height() - 1) + 1);
+    this.head = new Vector2(ThreadLocalRandom.current().nextInt(level.width() - 1) + 1, ThreadLocalRandom.current().nextInt(level.height() - 1) + 1);
     this.dead = false;
     this.body = new ArrayList<>();
     this.body.add(new Vector2(head.x, head.y));

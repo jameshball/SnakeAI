@@ -1,12 +1,11 @@
 package sh.ball.snake;
 
-import sh.ball.ai.Population;
 import sh.ball.ai.State;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /* The Level class holds all details about the current state of the game, including the Snake,
 Apple and score. It has the functionality to update the grid each frame. */
@@ -27,7 +26,6 @@ public class Level implements State {
   );
 
   private final Snake snake;
-  private final Random rnd;
 
   private final int width;
   private final int height;
@@ -39,7 +37,6 @@ public class Level implements State {
   private int movesSinceLastApple = 0;
 
   public Level(int width, int height) {
-    this.rnd = Population.rnd;
     this.width = width;
     this.height = height;
     this.allowedMoves = new int[width * height + 1];
@@ -66,7 +63,7 @@ public class Level implements State {
   /* Generates a new apple position, which is a random location that is not taken up by the snake. */
   private void resetApple() {
     int numEmptySpaces = width * height - snake.length();
-    int randomFreeSpace = rnd.nextInt(numEmptySpaces);
+    int randomFreeSpace = ThreadLocalRandom.current().nextInt(numEmptySpaces);
     int emptySpaceCount = 0;
 
     /* Loops through the grid and finds the randomFreeSpace within the grid that was randomly chosen
@@ -158,51 +155,48 @@ public class Level implements State {
   private List<Float> snakeLook(Vector2 direction) {
     /* I need to create a deep copy of snake.pos because I will be modifying it in this method. */
     Vector2 head = snake.head().copy();
-    Float[] vision = new Float[3];
-    int distance = 1;
+    List<Float> vision = new ArrayList<>(List.of(0f, 0f, 0f));
 
-    Arrays.fill(vision, 0.0f);
+    int distance = 1;
 
     /* Move head in the direction of the dir vector specified and continue if it is still
     within the bounds of the grid. */
     while (withinBounds(head.add(direction))) {
-      /* If head comes in contact with the snake's body and vision[0] is unassigned... */
-      if (grid[(int) head.x][(int) head.y] == GridState.SNAKE && vision[0] == 0) {
-        vision[0] = 1.0f / distance;
-      }
-
-      /* If head comes in contact with an apple and vision[1] is unassigned... */
-      if (grid[(int) head.x][(int) head.y] == GridState.APPLE && vision[1] == 0) {
-        vision[1] = 1.0f;
+      switch (grid[(int) head.x][(int) head.y]) {
+        /* If head comes in contact with the snake's body and vision[0] is unassigned... */
+        case SNAKE:
+          if (vision.get(0) == 0) {
+            vision.set(0, 1.0f / distance);
+          }
+          break;
+        /* If head comes in contact with an apple and vision[1] is unassigned... */
+        case APPLE:
+          if (vision.get(1) == 0) {
+            vision.set(1, 1.0f);
+          }
+          break;
       }
 
       distance++;
     }
 
     /* Sets the distance to the wall of the grid. */
-    vision[2] = 1.0f / distance;
+    vision.set(2, 1.0f / distance);
 
-    return Arrays.asList(vision);
+    return vision;
   }
 
   /* This uses the snakeLook() method to look in eight directions around the snake (i.e. NESW,
   and all diagonals). This forms as the input to the player's neural network. */
   @Override
-  public float[] getInputs() {
-    ArrayList<Float> vision = new ArrayList<>();
+  public List<Float> getInputs() {
+    List<Float> vision = new ArrayList<>();
 
     for (Vector2 direction : LOOKING_DIRECTIONS) {
       vision.addAll(snakeLook(direction));
     }
 
-    /* Converts the vision list into an array. */
-    float[] arr = new float[vision.size()];
-
-    for (int i = 0; i < vision.size(); i++) {
-      arr[i] = vision.get(i);
-    }
-
-    return arr;
+    return vision;
   }
 
   /* Returns true if the input vector is within the bounds of the grid. */

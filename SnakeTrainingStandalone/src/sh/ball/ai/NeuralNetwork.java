@@ -4,6 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ejml.simple.SimpleMatrix;
 
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 /* This class is responsible for managing and creating neural networks for the Player class. */
 public class NeuralNetwork {
 
@@ -53,17 +56,17 @@ public class NeuralNetwork {
     for (int i = 0; i < weightMatrices.length; i++) {
       /* This initialises a weight matrix, considering the extra bias node. */
       weightMatrices[i] = SimpleMatrix.random_DDRM(networkStructure[i + 1],
-        networkStructure[i] + 1, -1, 1, Population.rnd);
+        networkStructure[i] + 1, -1, 1, ThreadLocalRandom.current());
     }
   }
 
   /* Feeds an input array through the NN to return the output layer. */
-  public float[] feedForward(float[] input) throws IllegalArgumentException {
-    float[][] floatMatrix = new float[input.length][];
+  public float[] feedForward(List<Float> input) throws IllegalArgumentException {
+    float[][] floatMatrix = new float[input.size()][];
 
     for (int j = 0; j < floatMatrix.length; j++) {
       floatMatrix[j] = new float[1];
-      floatMatrix[j][0] = input[j];
+      floatMatrix[j][0] = input.get(j);
     }
 
     SimpleMatrix currentLayer = new SimpleMatrix(floatMatrix);
@@ -130,12 +133,12 @@ public class NeuralNetwork {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
         /* The mutationRate hyper-parameter in the Main class determines how often this occurs. */
-        if (Population.rnd.nextFloat() < MUTATION_RATE) {
+        if (ThreadLocalRandom.current().nextFloat() < MUTATION_RATE) {
           /* randomGaussian() generates a random number using normalized Gaussian distribution. Dividing
           by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
           positive impact. */
           double cellValue = m.get(i, j);
-          m.set(i, j, cellValue + Population.rnd.nextGaussian() / 5);
+          m.set(i, j, cellValue + ThreadLocalRandom.current().nextGaussian() / 5);
 
           /* If the weight falls outside the -1.0 to 1.0 range after mutation, limit it to this range. */
           if (cellValue > 1) {

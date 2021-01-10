@@ -1,11 +1,13 @@
 package sh.ball.ai;
 
+import java.util.List;
+
 public interface State {
   float evaluateFitness();
 
   void update(float[] inputs);
 
-  float[] getInputs();
+  List<Float> getInputs();
 
   boolean hasEnded();
 

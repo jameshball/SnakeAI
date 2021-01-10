@@ -11,11 +11,10 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 public class Population {
-
-  public static final Random rnd = new Random();
 
   private static final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy--HH-mm-ss");
   private static final int SAVING_FREQUENCY = 5;
@@ -105,7 +104,7 @@ public class Population {
       for (int j = 0; j < parent1.weightMatrices[i].numRows(); j++) {
         for (int k = 0; k < parent1.weightMatrices[i].numCols(); k++) {
           /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
-          if (rnd.nextFloat() > 0.5) {
+          if (ThreadLocalRandom.current().nextFloat() > 0.5) {
             child.weightMatrices[i].set(j, k, parent1.weightMatrices[i].get(j, k));
           } else {
             child.weightMatrices[i].set(j, k, parent2.weightMatrices[i].get(j, k));
@@ -136,7 +135,7 @@ public class Population {
   /* Randomly selects a NN from a player in the population based on how well they performed. It is a
   random selection, but players that perform better are more likely to be chosen. */
   private NeuralNetwork selectParent() {
-    float threshold = rnd.nextFloat() * fitnessSum();
+    float threshold = ThreadLocalRandom.current().nextFloat() * fitnessSum();
     float total = 0;
 
     for (Player player : players) {

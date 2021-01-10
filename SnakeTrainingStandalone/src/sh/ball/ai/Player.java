@@ -2,6 +2,8 @@ package sh.ball.ai;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 /* This class manages the level, along with the neural network that controls the snake. */
 public class Player {
   private final NeuralNetwork nn;
@@ -25,7 +27,7 @@ public class Player {
     return (float) Math.sqrt(level.evaluateFitness());
   }
 
-  public float[] vision() {
+  public List<Float> vision() {
     return level.getInputs();
   }
 
