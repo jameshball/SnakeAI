@@ -1,4 +1,4 @@
-package sh.ball;
+package sh.ball.ai;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,54 +10,54 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.IntStream;
 
-import static sh.ball.HelperClass.random;
-import static sh.ball.Main.*;
+public class Population {
 
-class Population {
+  public static final Random rnd = new Random();
 
   private static final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy--HH-mm-ss");
   private static final int SAVING_FREQUENCY = 5;
 
   private Player[] players;
   private int gen = 0;
+  private int[] networkStructure;
 
-  Population() {
-    players = new Player[populationSize];
+  private final int POPULATION_COUNT;
+  private final State state;
+  private final List<Float> maxScore = new ArrayList<>();
+  private final List<Float> avgScore = new ArrayList<>();
 
-    for (int i = 0; i < populationSize; i++) {
-      players[i] = new Player();
+  public Population(int populationCount, int[] networkStructure, State state) {
+    this.POPULATION_COUNT = populationCount;
+    this.players = new Player[populationCount];
+    this.networkStructure = networkStructure;
+    this.state = state.deepCopy().reset();
+
+    for (int i = 0; i < populationCount; i++) {
+      players[i] = new Player(networkStructure, state);
     }
   }
 
-  Population(String path) throws FileNotFoundException {
-    load(path);
+  public Population(String path, State state) throws FileNotFoundException {
+    this.state = state.deepCopy().reset();
+    this.POPULATION_COUNT = load(path);
   }
 
   /* Executes every frame to update the game-state and checks if the generation has ended yet. */
-  void update() {
-    NeuralNetwork.feedForward(getInputs(), players);
+  public void update() {
+    for (Player player : players) {
+      if (player.isAlive()) {
+        player.setOutput(player.neuralNetwork().feedForward(player.vision()));
+      }
+    }
     Arrays.stream(players).parallel().forEach(Player::update);
 
     /* If all snakes have died, create the next generation of players. */
     if (isAllDead()) {
       naturalSelection();
     }
-  }
-
-  float[][] getInputs() {
-    float[][] inputs = new float[players.length][];
-
-    for (int i = 0; i < players.length; i++) {
-      if (players[i].isAlive()) {
-        inputs[i] = players[i].vision();
-      }
-    }
-
-    return inputs;
   }
 
   /* Returns true is all snakes have died, false otherwise. */
@@ -68,20 +68,20 @@ class Population {
   /* This selects the best players from the last generation, 'breeds' them and then mutates them -
   mimicking natural selection to generate a new generation of players. */
   private void naturalSelection() {
-    Player[] nextGen = new Player[populationSize];
+    Player[] nextGen = new Player[POPULATION_COUNT];
 
     int bestIndex = getBest();
 
     /* We move the best player from the last generation into the new generation to ensure the next
     generation's best shouldn't perform worse. */
-    nextGen[0] = new Player(players[bestIndex].neuralNetwork());
+    nextGen[0] = new Player(players[bestIndex].neuralNetwork(), state);
 
-    for (int i = 1; i < populationSize; i++) {
+    for (int i = 1; i < POPULATION_COUNT; i++) {
       /* Create each player in the new generation by performing selection, crossover and mutation. */
-      nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights());
+      nextGen[i] = new Player(uniformCrossover(selectParent(), selectParent()).mutateWeights(), state);
     }
 
-    float currentAvg = scoreSum() / populationSize;
+    float currentAvg = scoreSum() / POPULATION_COUNT;
     float currentMax = players[bestIndex].score();
 
     avgScore.add(currentAvg);
@@ -102,13 +102,13 @@ class Population {
   private NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
     /* Normally, I should compare each NN to check their dimensions are the same, but as all NNs in this
     program are created with exactly the same dimensions, this isn't an issue. */
-    NeuralNetwork child = new NeuralNetwork();
+    NeuralNetwork child = new NeuralNetwork(parent1.networkStructure);
 
     for (int i = 0; i < parent1.weightMatrices.length; i++) {
       for (int j = 0; j < parent1.weightMatrices[i].numRows(); j++) {
         for (int k = 0; k < parent1.weightMatrices[i].numCols(); k++) {
           /* There is a 50% chance the child inherits this weight from either parent1 or parent2. */
-          if (random(1) > 0.5) {
+          if (rnd.nextFloat() > 0.5) {
             child.weightMatrices[i].set(j, k, parent1.weightMatrices[i].get(j, k));
           } else {
             child.weightMatrices[i].set(j, k, parent2.weightMatrices[i].get(j, k));
@@ -124,22 +124,22 @@ class Population {
   private float fitnessSum() {
     return Arrays.stream(players)
         .map(Player::fitness)
-        .reduce(Integer::sum)
-        .orElse(0);
+        .reduce(Float::sum)
+        .orElse(0f);
   }
 
   /* Returns the sum of all snake scores. i.e. the total number of apples eaten. */
   private float scoreSum() {
     return Arrays.stream(players)
       .map(Player::score)
-      .reduce(Integer::sum)
-      .orElse(0);
+      .reduce(Float::sum)
+      .orElse(0f);
   }
 
   /* Randomly selects a NN from a player in the population based on how well they performed. It is a
   random selection, but players that perform better are more likely to be chosen. */
   private NeuralNetwork selectParent() {
-    float threshold = random(fitnessSum());
+    float threshold = rnd.nextFloat() * fitnessSum();
     float total = 0;
 
     for (Player player : players) {
@@ -205,8 +205,8 @@ class Population {
     }
   }
 
-  void load(String path) throws FileNotFoundException {
-    File file = new File(workingDir + path);
+  public int load(String path) throws FileNotFoundException {
+    File file = new File(path);
 
     JSONTokener tokener = new JSONTokener(new FileInputStream(file));
     JSONObject program = new JSONObject(tokener);
@@ -224,14 +224,14 @@ class Population {
 
     gen = program.getInt("gen");
 
-    /* Change populationSize to the number of neural networks in the neuralNetworks JSONArray. */
-    populationSize = neuralNetworks.length();
+    /* Change populationCount to the number of neural networks in the neuralNetworks JSONArray. */
+    int populationCount = neuralNetworks.length();
 
-    players = new Player[populationSize];
+    players = new Player[populationCount];
 
-    for (int i = 0; i < populationSize; i++) {
+    for (int i = 0; i < populationCount; i++) {
       /* Initialises new Player objects using the neural network JSONObjects in neuralNetworks. */
-      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)));
+      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)), state);
     }
 
     /* Loads all graph data. */
@@ -242,5 +242,7 @@ class Population {
     for (int i = 0; i < avgScoreData.length(); i++) {
       avgScore.add(avgScoreData.getFloat(i));
     }
+
+    return populationCount;
   }
 }

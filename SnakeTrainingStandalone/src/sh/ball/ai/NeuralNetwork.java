@@ -1,33 +1,31 @@
-package sh.ball;
+package sh.ball.ai;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ejml.simple.SimpleMatrix;
 
-import java.util.Arrays;
-
-import static sh.ball.HelperClass.random;
-import static java.lang.Math.exp;
-
 /* This class is responsible for managing and creating neural networks for the Player class. */
-class NeuralNetwork {
-  SimpleMatrix[] weightMatrices;
+public class NeuralNetwork {
 
-  NeuralNetwork() {
-    weightMatrices = new SimpleMatrix[Main.networkStructure.length - 1];
+  private static float MUTATION_RATE = 0.02f;
+  public SimpleMatrix[] weightMatrices;
+  public final int[] networkStructure;
 
-    /* Initialises n-1 weight matrices where n is the number of layers in the network. */
-    for (int i = 0; i < weightMatrices.length; i++) {
-      /* This initialises a weight matrix, considering the extra bias node. */
-      weightMatrices[i] = SimpleMatrix.random_DDRM(Main.networkStructure[i + 1],
-          Main.networkStructure[i] + 1, -1, 1, HelperClass.rnd);
-    }
+  public NeuralNetwork(int[] networkStructure) {
+    this.networkStructure = networkStructure;
+    initialiseWeightMatrices();
   }
 
   /* Loads a NeuralNetwork object from a JSONObject. */
-  NeuralNetwork(JSONObject neuralNet) {
-    /* Executes NeuralNetwork() constructor. */
-    this();
+  public NeuralNetwork(JSONObject neuralNet) {
+    int layerCount = neuralNet.getInt("layerCount");
+    this.networkStructure = new int[layerCount];
+
+    for (int i = 0; i < layerCount; i++) {
+      networkStructure[i] = neuralNet.getInt("length " + i);
+    }
+
+    initialiseWeightMatrices();
 
     for (int i = 0; i < weightMatrices.length; i++) {
       /* Fetches the specified weight matrix stored in this JSONObject. */
@@ -45,40 +43,36 @@ class NeuralNetwork {
     }
   }
 
-  /* Feeds an input array through the NN to return the output layer. */
-  public static void feedForward(float[][] inputs, Player[] players) throws IllegalArgumentException {
-    SimpleMatrix[] currentLayers = new SimpleMatrix[inputs.length];
-
-    for (int i = 0; i < players.length; i++) {
-      if (players[i].isAlive()) {
-        float[][] floatMatrix = new float[inputs[i].length][];
-
-        for (int j = 0; j < floatMatrix.length; j++) {
-          floatMatrix[j] = new float[1];
-          floatMatrix[j][0] = inputs[i][j];
-        }
-
-        currentLayers[i] = new SimpleMatrix(floatMatrix);
-      }
-    }
-
-    for (int i = 0; i < Main.networkStructure.length - 1; i++) {
-      for (int j = 0; j < currentLayers.length; j++) {
-        if (players[j].isAlive()) {
-          currentLayers[j] = applyReLu(players[j].neuralNetwork().weightMatrices[i].mult(addBias(currentLayers[j])));
-        }
-      }
-    }
-
-    for (int i = 0; i < players.length; i++) {
-      if (players[i].isAlive()) {
-        players[i].setOutput(toArray(currentLayers[i]));
-      }
+  private void initialiseWeightMatrices() {
+    weightMatrices = new SimpleMatrix[networkStructure.length - 1];
+    /* Initialises n-1 weight matrices where n is the number of layers in the network. */
+    for (int i = 0; i < weightMatrices.length; i++) {
+      /* This initialises a weight matrix, considering the extra bias node. */
+      weightMatrices[i] = SimpleMatrix.random_DDRM(networkStructure[i + 1],
+        networkStructure[i] + 1, -1, 1, Population.rnd);
     }
   }
 
+  /* Feeds an input array through the NN to return the output layer. */
+  public float[] feedForward(float[] input) throws IllegalArgumentException {
+    float[][] floatMatrix = new float[input.length][];
+
+    for (int j = 0; j < floatMatrix.length; j++) {
+      floatMatrix[j] = new float[1];
+      floatMatrix[j][0] = input[j];
+    }
+
+    SimpleMatrix currentLayer = new SimpleMatrix(floatMatrix);
+
+    for (int i = 0; i < networkStructure.length - 1; i++) {
+      currentLayer = applyReLu(weightMatrices[i].mult(addBias(currentLayer)));
+    }
+
+    return toArray(currentLayer);
+  }
+
   /* Converts the matrix data to a 1D array of length rows*cols. */
-  static float[] toArray(SimpleMatrix m) {
+  private float[] toArray(SimpleMatrix m) {
     int rows = m.numRows();
     int cols = m.numCols();
 
@@ -94,7 +88,7 @@ class NeuralNetwork {
   }
 
   /* This adds a bias node (node with a constant value of 1.0) to a one-column matrix. */
-  static SimpleMatrix addBias(SimpleMatrix m) throws IllegalArgumentException {
+  private static SimpleMatrix addBias(SimpleMatrix m) throws IllegalArgumentException {
     SimpleMatrix n;
     int rows = m.numRows();
     int cols = m.numCols();
@@ -118,13 +112,10 @@ class NeuralNetwork {
   }
 
   /* Applies the ReLu function to all values in the matrix and returns it. */
-  static SimpleMatrix applyReLu(SimpleMatrix m) {
+  private static SimpleMatrix applyReLu(SimpleMatrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
-        /* This is a simple max(0, data[i][j]) function. */
-        if (m.get(i, j) < 0) {
-          m.set(i, j, 0);
-        }
+        m.set(i, j, State.relu((float) m.get(i, j)));
       }
     }
 
@@ -132,28 +123,26 @@ class NeuralNetwork {
   }
 
   /* Applies the sigmoid function to all values in the matrix and returns it. */
-  SimpleMatrix applySigmoid(SimpleMatrix m) {
+  private static SimpleMatrix applySigmoid(SimpleMatrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
-        double x = m.get(i, j);
-        /* This implements the sigmoid function: 1/(1+e^-x). */
-        m.set(i, j, 1.0f / (1.0 + exp(-x)));
+        m.set(i, j, State.sigmoid((float) m.get(i, j)));
       }
     }
 
     return m;
   }
 
-  SimpleMatrix mutate(SimpleMatrix m) {
+  private SimpleMatrix mutate(SimpleMatrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
         /* The mutationRate hyper-parameter in the Main class determines how often this occurs. */
-        if (HelperClass.random(1) < Main.mutationRate) {
+        if (Population.rnd.nextFloat() < MUTATION_RATE) {
           /* randomGaussian() generates a random number using normalized Gaussian distribution. Dividing
           by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
           positive impact. */
           double cellValue = m.get(i, j);
-          m.set(i, j, cellValue + HelperClass.randomGaussian() / 5);
+          m.set(i, j, cellValue + Population.rnd.nextGaussian() / 5);
 
           /* If the weight falls outside the -1.0 to 1.0 range after mutation, limit it to this range. */
           if (cellValue > 1) {
@@ -169,7 +158,7 @@ class NeuralNetwork {
   }
 
   /* Mutates all weightMatrices and returns the NN object. */
-  NeuralNetwork mutateWeights() {
+  public NeuralNetwork mutateWeights() {
     for (SimpleMatrix weightMatrix : weightMatrices) {
       mutate(weightMatrix);
     }
@@ -177,14 +166,14 @@ class NeuralNetwork {
     return this;
   }
 
-  JSONObject save() {
+  public JSONObject save() {
     JSONObject neuralNet = new JSONObject();
 
-    neuralNet.put("layerCount", Main.networkStructure.length);
+    neuralNet.put("layerCount", networkStructure.length);
     neuralNet.put("matrixCount", weightMatrices.length);
 
-    for (int i = 0; i < Main.networkStructure.length; i++) {
-      neuralNet.put("length " + i, Main.networkStructure[i]);
+    for (int i = 0; i < networkStructure.length; i++) {
+      neuralNet.put("length " + i, networkStructure[i]);
     }
 
     for (int i = 0; i < weightMatrices.length; i++) {
