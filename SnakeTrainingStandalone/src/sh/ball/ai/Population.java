@@ -102,7 +102,7 @@ public class Population {
   private NeuralNetwork uniformCrossover(NeuralNetwork parent1, NeuralNetwork parent2) {
     /* Normally, I should compare each NN to check their dimensions are the same, but as all NNs in this
     program are created with exactly the same dimensions, this isn't an issue. */
-    NeuralNetwork child = new NeuralNetwork(parent1.networkStructure);
+    NeuralNetwork child = new NeuralNetwork(parent1.networkStructure, state);
 
     for (int i = 0; i < parent1.weightMatrices.length; i++) {
       for (int j = 0; j < parent1.weightMatrices[i].numRows(); j++) {
@@ -231,7 +231,7 @@ public class Population {
 
     for (int i = 0; i < populationCount; i++) {
       /* Initialises new Player objects using the neural network JSONObjects in neuralNetworks. */
-      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i)), state);
+      players[i] = new Player(new NeuralNetwork(neuralNetworks.getJSONObject(i), state), state);
     }
 
     /* Loads all graph data. */

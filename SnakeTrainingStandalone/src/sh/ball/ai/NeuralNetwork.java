@@ -7,19 +7,23 @@ import org.ejml.simple.SimpleMatrix;
 /* This class is responsible for managing and creating neural networks for the Player class. */
 public class NeuralNetwork {
 
-  private static float MUTATION_RATE = 0.02f;
+  private static final float MUTATION_RATE = 0.02f;
   public SimpleMatrix[] weightMatrices;
   public final int[] networkStructure;
 
-  public NeuralNetwork(int[] networkStructure) {
+  private final State state;
+
+  public NeuralNetwork(int[] networkStructure, State state) {
     this.networkStructure = networkStructure;
+    this.state = state;
     initialiseWeightMatrices();
   }
 
   /* Loads a NeuralNetwork object from a JSONObject. */
-  public NeuralNetwork(JSONObject neuralNet) {
+  public NeuralNetwork(JSONObject neuralNet, State state) {
     int layerCount = neuralNet.getInt("layerCount");
     this.networkStructure = new int[layerCount];
+    this.state = state;
 
     for (int i = 0; i < layerCount; i++) {
       networkStructure[i] = neuralNet.getInt("length " + i);
@@ -65,7 +69,7 @@ public class NeuralNetwork {
     SimpleMatrix currentLayer = new SimpleMatrix(floatMatrix);
 
     for (int i = 0; i < networkStructure.length - 1; i++) {
-      currentLayer = applyReLu(weightMatrices[i].mult(addBias(currentLayer)));
+      currentLayer = activate(weightMatrices[i].mult(addBias(currentLayer)));
     }
 
     return toArray(currentLayer);
@@ -111,22 +115,11 @@ public class NeuralNetwork {
     return n;
   }
 
-  /* Applies the ReLu function to all values in the matrix and returns it. */
-  private static SimpleMatrix applyReLu(SimpleMatrix m) {
+  /* Activates all values in the matrix and returns it. */
+  private SimpleMatrix activate(SimpleMatrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
-        m.set(i, j, State.relu((float) m.get(i, j)));
-      }
-    }
-
-    return m;
-  }
-
-  /* Applies the sigmoid function to all values in the matrix and returns it. */
-  private static SimpleMatrix applySigmoid(SimpleMatrix m) {
-    for (int i = 0; i < m.numRows(); i++) {
-      for (int j = 0; j < m.numCols(); j++) {
-        m.set(i, j, State.sigmoid((float) m.get(i, j)));
+        m.set(i, j, state.activate((float) m.get(i, j)));
       }
     }
 

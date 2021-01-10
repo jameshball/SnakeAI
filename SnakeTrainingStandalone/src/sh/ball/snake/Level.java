@@ -232,7 +232,7 @@ public class Level implements State {
 
   @Override
   public float activate(float x) {
-    return State.sigmoid(x);
+    return State.relu(x);
   }
 
   public int width() {

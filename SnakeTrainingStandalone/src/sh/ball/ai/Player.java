@@ -9,7 +9,7 @@ public class Player {
   private final State level;
 
   public Player(int[] networkStructure, State state) {
-    this(new NeuralNetwork(networkStructure), state);
+    this(new NeuralNetwork(networkStructure, state), state);
   }
 
   public Player(NeuralNetwork nn, State state) {
