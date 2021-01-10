@@ -4,14 +4,23 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Date;
 
 import static sh.ball.HelperClass.random;
 import static sh.ball.Main.*;
 
 class Population {
+
+  private static final SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy--HH-mm-ss");
+  private static final int SAVING_FREQUENCY = 5;
+
   private Player[] players;
   private int gen = 0;
 
@@ -52,13 +61,7 @@ class Population {
 
   /* Returns true is all snakes have died, false otherwise. */
   private boolean isAllDead() {
-    for (int i = 0; i < players.length; i++) {
-      if (players[i].isAlive()) {
-        return false;
-      }
-    }
-
-    return true;
+    return Arrays.stream(players).noneMatch(Player::isAlive);
   }
 
   /* This selects the best players from the last generation, 'breeds' them and then mutates them -
@@ -83,12 +86,15 @@ class Population {
     avgScore.add(currentAvg);
     maxScore.add(currentMax);
 
-    System.out.println(String.format("Gen: %1$s\tMax: %2$s\tAvg: %3$s\tTime: %4$s", gen, currentMax,
-        currentAvg, LocalDateTime.now().toLocalTime()));
+    System.out.printf(
+        "Gen: %1$s\tMax: %2$s\tAvg: %3$s\tTime: %4$s%n",
+        gen, currentMax, currentAvg, LocalDateTime.now().toLocalTime());
     gen++;
 
     players = nextGen;
-    save();
+    if (gen % SAVING_FREQUENCY == 0) {
+      save();
+    }
   }
 
   /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimics breeding. */
@@ -201,10 +207,12 @@ class Population {
     program.put("maxScoreData", maxScoreData);
     program.put("avgScoreData", avgScoreData);
 
+    Date date = new Date();
     /* Saves the JSONObject to the specified path. */
-    try (PrintWriter out = new PrintWriter(workingDir + "/data/program.json")) {
+    try (PrintWriter out = new PrintWriter("data/generation-" + gen + "--" + formatter.format(date) + ".json")) {
       out.println(program.toString());
-    } catch (FileNotFoundException e) {
+    } catch (FileNotFoundException ignored) {
+
     }
   }
 
@@ -222,7 +230,7 @@ class Population {
 
     /* Loads all details about the networkStructure from the JSONObject. */
     for (int i = 0; i < networkStructure.length; i++) {
-      networkStructure[i] = program.getInt("length " + Integer.toString(i));
+      networkStructure[i] = program.getInt("length " + i);
     }
 
     gen = program.getInt("gen");
