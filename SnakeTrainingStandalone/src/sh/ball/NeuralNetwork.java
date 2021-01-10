@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.ejml.simple.SimpleMatrix;
 
+import java.util.Arrays;
+
 import static sh.ball.HelperClass.random;
 import static java.lang.Math.exp;
 
@@ -63,14 +65,14 @@ class NeuralNetwork {
     for (int i = 0; i < Main.networkStructure.length - 1; i++) {
       for (int j = 0; j < currentLayers.length; j++) {
         if (players[j].isAlive()) {
-          currentLayers[j] = applyReLu(players[j].nn.weightMatrices[i].mult(addBias(currentLayers[j])));
+          currentLayers[j] = applyReLu(players[j].neuralNetwork().weightMatrices[i].mult(addBias(currentLayers[j])));
         }
       }
     }
 
     for (int i = 0; i < players.length; i++) {
       if (players[i].isAlive()) {
-        players[i].output = toArray(currentLayers[i]);
+        players[i].setOutput(toArray(currentLayers[i]));
       }
     }
   }

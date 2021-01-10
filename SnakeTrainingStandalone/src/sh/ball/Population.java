@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.IntStream;
 
 import static sh.ball.HelperClass.random;
 import static sh.ball.Main.*;
@@ -52,7 +53,7 @@ class Population {
 
     for (int i = 0; i < players.length; i++) {
       if (players[i].isAlive()) {
-        inputs[i] = players[i].level.vision();
+        inputs[i] = players[i].vision();
       }
     }
 
@@ -73,7 +74,7 @@ class Population {
 
     /* We move the best player from the last generation into the new generation to ensure the next
     generation's best shouldn't perform worse. */
-    nextGen[0] = new Player(players[bestIndex].nn);
+    nextGen[0] = new Player(players[bestIndex].neuralNetwork());
 
     for (int i = 1; i < populationSize; i++) {
       /* Create each player in the new generation by performing selection, crossover and mutation. */
@@ -81,7 +82,7 @@ class Population {
     }
 
     float currentAvg = scoreSum() / populationSize;
-    float currentMax = players[bestIndex].level.score;
+    float currentMax = players[bestIndex].score();
 
     avgScore.add(currentAvg);
     maxScore.add(currentMax);
@@ -121,24 +122,18 @@ class Population {
 
   /* Returns the sum of all snake fitness. This is their score squared. */
   private float fitnessSum() {
-    float total = 0;
-
-    for (Player player : players) {
-      total += Math.pow(player.level.score, 2);
-    }
-
-    return total;
+    return Arrays.stream(players)
+        .map(Player::fitness)
+        .reduce(Integer::sum)
+        .orElse(0);
   }
 
   /* Returns the sum of all snake scores. i.e. the total number of apples eaten. */
   private float scoreSum() {
-    float total = 0;
-
-    for (Player player : players) {
-      total += player.level.score;
-    }
-
-    return total;
+    return Arrays.stream(players)
+      .map(Player::score)
+      .reduce(Integer::sum)
+      .orElse(0);
   }
 
   /* Randomly selects a NN from a player in the population based on how well they performed. It is a
@@ -148,10 +143,10 @@ class Population {
     float total = 0;
 
     for (Player player : players) {
-      total += Math.pow(player.level.score, 2);
+      total += player.fitness();
 
       if (total > threshold) {
-        return player.nn;
+        return player.neuralNetwork();
       }
     }
 
@@ -160,17 +155,10 @@ class Population {
 
   /* Returns the index of the snake that is currently the longest. */
   private int getBest() {
-    int max = players[0].level.score;
-    int maxIndex = 0;
-
-    for (int i = 1; i < players.length; i++) {
-      if (players[i].level.score > max) {
-        max = players[i].level.score;
-        maxIndex = i;
-      }
-    }
-
-    return maxIndex;
+    return IntStream
+      .range(0, players.length)
+      .reduce((i, j) -> players[i].score() > players[j].score() ? i : j)
+      .orElse(0);
   }
 
   private void save() {
@@ -191,7 +179,7 @@ class Population {
 
     for (int i = 0; i < players.length; i++) {
       /* Appends all the player's neural networks to the neuralNetwork JSONArray. */
-      neuralNetworks.put(i, players[i].nn.save());
+      neuralNetworks.put(i, players[i].save());
     }
 
     for (int i = 0; i < maxScore.size(); i++) {
@@ -209,7 +197,8 @@ class Population {
 
     Date date = new Date();
     /* Saves the JSONObject to the specified path. */
-    try (PrintWriter out = new PrintWriter("data/generation-" + gen + "--" + formatter.format(date) + ".json")) {
+    try (PrintWriter out =
+        new PrintWriter("data/generation-" + gen + "--" + formatter.format(date) + ".json")) {
       out.println(program.toString());
     } catch (FileNotFoundException ignored) {
 
