@@ -27,6 +27,7 @@ public class Level implements State {
   );
   private static final int INPUTS_PER_DIR = 3;
   private static final int NUM_INPUTS = 24;
+  private static final List<Float> BLANK_VISION = Collections.nCopies(NUM_INPUTS, 0f);
 
   private final Snake snake;
 
@@ -160,7 +161,7 @@ public class Level implements State {
   and all diagonals). This forms as the input to the player's neural network. */
   @Override
   public List<Float> getInputs() {
-    List<Float> vision = new ArrayList<>(Collections.nCopies(NUM_INPUTS, 0f));
+    List<Float> vision = new ArrayList<>(BLANK_VISION);
 
     int i = 0;
     for (Vector2 direction : LOOKING_DIRECTIONS) {

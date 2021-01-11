@@ -12,6 +12,7 @@ public class Snake {
 
   private final Level level;
   private final Deque<Vector2> body;
+  private final Set<Vector2> bodySet;
   private final Vector2 head;
 
   private Vector2 direction;
@@ -23,6 +24,7 @@ public class Snake {
     this.head = new Vector2(ThreadLocalRandom.current().nextInt(level.width() - 1) + 1, ThreadLocalRandom.current().nextInt(level.height() - 1) + 1);
     this.dead = false;
     this.body = new ArrayDeque<>();
+    this.bodySet = new HashSet<>();
     this.body.add(new Vector2(head.x, head.y));
     this.direction = DEFAULT_DIRECTION;
   }
@@ -37,7 +39,7 @@ public class Snake {
   public void update() {
     head.add(direction);
 
-    if (isTail(head) || !level.withinBounds(head)) {
+    if (isBody(head) || !level.withinBounds(head)) {
       dead = true;
     }
   }
@@ -45,26 +47,23 @@ public class Snake {
   /* This method moves the snake by removing the last element in their tail and adding the location of the
   snake's head. */
   public void move() {
-    body.removeFirst();
-    body.add(head.copy());
+    Vector2 removed = body.removeFirst();
+    bodySet.remove(removed);
+    extend();
   }
 
   /* This method extends the snake's body by adding the new position of the snake's head, without removing
   the end of its tail. */
-
   public void extend() {
-    body.add(head.copy());
+    Vector2 newHead = head.copy();
+    body.add(newHead);
+    bodySet.add(newHead);
   }
+
   /* Compares each part of the snake's tail with the new head position. If they are equal, the snake has
   hit its tail. */
-
-  private boolean isTail(Vector2 vector) {
-    for (Vector2 part : body) {
-      if (part.x == vector.x && part.y == vector.y) {
-        return true;
-      }
-    }
-    return false;
+  private boolean isBody(Vector2 vector) {
+    return bodySet.contains(vector);
   }
   /* Updates the snake's direction so it now points in the new direction. */
 
