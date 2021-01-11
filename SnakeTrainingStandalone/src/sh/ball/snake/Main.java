@@ -9,8 +9,8 @@ public class Main {
   private static final int POPULATION_COUNT = 500;
   private static final int[] NETWORK_STRUCTURE = new int[] {24, 16, 4};
 
-  static int GRID_X = 20;
-  static int GRID_Y = 20;
+  static int GRID_X = 40;
+  static int GRID_Y = 40;
 
   public static void main(String[] args) throws FileNotFoundException {
     Population pop;

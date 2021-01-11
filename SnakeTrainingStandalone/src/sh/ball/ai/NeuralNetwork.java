@@ -2,7 +2,6 @@ package sh.ball.ai;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.ejml.simple.SimpleMatrix;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -11,7 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class NeuralNetwork {
 
   private static final float MUTATION_RATE = 0.02f;
-  public SimpleMatrix[] weightMatrices;
+  public Matrix[] weightMatrices;
   public final int[] networkStructure;
 
   private final State state;
@@ -51,12 +50,11 @@ public class NeuralNetwork {
   }
 
   private void initialiseWeightMatrices() {
-    weightMatrices = new SimpleMatrix[networkStructure.length - 1];
+    weightMatrices = new Matrix[networkStructure.length - 1];
     /* Initialises n-1 weight matrices where n is the number of layers in the network. */
     for (int i = 0; i < weightMatrices.length; i++) {
       /* This initialises a weight matrix, considering the extra bias node. */
-      weightMatrices[i] = SimpleMatrix.random_DDRM(networkStructure[i + 1],
-        networkStructure[i] + 1, -1, 1, ThreadLocalRandom.current());
+      weightMatrices[i] = new Matrix(networkStructure[i + 1], networkStructure[i] + 1).randomize();
     }
   }
 
@@ -69,17 +67,17 @@ public class NeuralNetwork {
       floatMatrix[j][0] = input.get(j);
     }
 
-    SimpleMatrix currentLayer = new SimpleMatrix(floatMatrix);
+    Matrix currentLayer = new Matrix(floatMatrix);
 
     for (int i = 0; i < networkStructure.length - 1; i++) {
-      currentLayer = activate(weightMatrices[i].mult(addBias(currentLayer)));
+      currentLayer = activate(weightMatrices[i].multiply(addBias(currentLayer)));
     }
 
     return toArray(currentLayer);
   }
 
   /* Converts the matrix data to a 1D array of length rows*cols. */
-  private float[] toArray(SimpleMatrix m) {
+  private float[] toArray(Matrix m) {
     int rows = m.numRows();
     int cols = m.numCols();
 
@@ -87,7 +85,7 @@ public class NeuralNetwork {
 
     for (int i = 0; i < rows; i++) {
       for (int j = 0; j < cols; j++) {
-        arr[i * cols + j] = (float) m.get(i, j);
+        arr[i * cols + j] = m.get(i, j);
       }
     }
 
@@ -95,15 +93,15 @@ public class NeuralNetwork {
   }
 
   /* This adds a bias node (node with a constant value of 1.0) to a one-column matrix. */
-  private static SimpleMatrix addBias(SimpleMatrix m) throws IllegalArgumentException {
-    SimpleMatrix n;
+  private static Matrix addBias(Matrix m) throws IllegalArgumentException {
+    Matrix n;
     int rows = m.numRows();
     int cols = m.numCols();
 
     /* This should only add a bias node to a one-column matrix so an exception is thrown if the matrix
     is not Nx1. */
     if (cols == 1) {
-      n = new SimpleMatrix(rows + 1, cols);
+      n = new Matrix(rows + 1, cols);
 
       for (int i = 0; i < rows; i++) {
         n.set(i, 0, m.get(i, 0));
@@ -119,17 +117,17 @@ public class NeuralNetwork {
   }
 
   /* Activates all values in the matrix and returns it. */
-  private SimpleMatrix activate(SimpleMatrix m) {
+  private Matrix activate(Matrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
-        m.set(i, j, state.activate((float) m.get(i, j)));
+        m.set(i, j, state.activate(m.get(i, j)));
       }
     }
 
     return m;
   }
 
-  private SimpleMatrix mutate(SimpleMatrix m) {
+  private Matrix mutate(Matrix m) {
     for (int i = 0; i < m.numRows(); i++) {
       for (int j = 0; j < m.numCols(); j++) {
         /* The mutationRate hyper-parameter in the Main class determines how often this occurs. */
@@ -138,7 +136,7 @@ public class NeuralNetwork {
           by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
           positive impact. */
           double cellValue = m.get(i, j);
-          m.set(i, j, cellValue + ThreadLocalRandom.current().nextGaussian() / 5);
+          m.set(i, j, (float) (cellValue + ThreadLocalRandom.current().nextGaussian() / 5));
 
           /* If the weight falls outside the -1.0 to 1.0 range after mutation, limit it to this range. */
           if (cellValue > 1) {
@@ -155,7 +153,7 @@ public class NeuralNetwork {
 
   /* Mutates all weightMatrices and returns the NN object. */
   public NeuralNetwork mutateWeights() {
-    for (SimpleMatrix weightMatrix : weightMatrices) {
+    for (Matrix weightMatrix : weightMatrices) {
       mutate(weightMatrix);
     }
 

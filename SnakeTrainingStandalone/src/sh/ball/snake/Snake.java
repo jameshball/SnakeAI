@@ -1,7 +1,6 @@
 package sh.ball.snake;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 /* Snake holds all the information about the Snake, including its current position, location of all parts
@@ -12,7 +11,7 @@ public class Snake {
   private static final Vector2 DEFAULT_DIRECTION = Vector2.WEST;
 
   private final Level level;
-  private final List<Vector2> body;
+  private final Deque<Vector2> body;
   private final Vector2 head;
 
   private Vector2 direction;
@@ -23,7 +22,7 @@ public class Snake {
     /* This resets the snake's head to a random position at least 1 square away from the edges. */
     this.head = new Vector2(ThreadLocalRandom.current().nextInt(level.width() - 1) + 1, ThreadLocalRandom.current().nextInt(level.height() - 1) + 1);
     this.dead = false;
-    this.body = new ArrayList<>();
+    this.body = new ArrayDeque<>();
     this.body.add(new Vector2(head.x, head.y));
     this.direction = DEFAULT_DIRECTION;
   }
@@ -46,7 +45,7 @@ public class Snake {
   /* This method moves the snake by removing the last element in their tail and adding the location of the
   snake's head. */
   public void move() {
-    body.remove(0);
+    body.removeFirst();
     body.add(head.copy());
   }
 
@@ -60,13 +59,11 @@ public class Snake {
   hit its tail. */
 
   private boolean isTail(Vector2 vector) {
-    for (int i = 0; i < body.size() - 1; i++) {
-      Vector2 part = body.get(i);
-      if (vector.equals(part)) {
+    for (Vector2 part : body) {
+      if (part.x == vector.x && part.y == vector.y) {
         return true;
       }
     }
-
     return false;
   }
   /* Updates the snake's direction so it now points in the new direction. */
@@ -83,7 +80,7 @@ public class Snake {
   }
 
   public Vector2 tail() {
-    return body.get(0);
+    return body.peekFirst();
   }
 
   public Vector2 head() {

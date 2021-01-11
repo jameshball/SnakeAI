@@ -4,6 +4,7 @@ import sh.ball.ai.State;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -24,6 +25,8 @@ public class Level implements State {
     Vector2.WEST,
     Vector2.NORTHWEST
   );
+  private static final int INPUTS_PER_DIR = 3;
+  private static final int NUM_INPUTS = 24;
 
   private final Snake snake;
 
@@ -63,6 +66,9 @@ public class Level implements State {
   /* Generates a new apple position, which is a random location that is not taken up by the snake. */
   private void resetApple() {
     int numEmptySpaces = width * height - snake.length();
+    if (numEmptySpaces == 0) {
+      return;
+    }
     int randomFreeSpace = ThreadLocalRandom.current().nextInt(numEmptySpaces);
     int emptySpaceCount = 0;
 
@@ -150,50 +156,43 @@ public class Level implements State {
     grid[(int) pos.x][(int) pos.y] = objectType;
   }
 
-  /* Returns a list of three numbers. They represent the distance to the snake's body, the apple
-  and the walls of the grid. */
-  private List<Float> snakeLook(Vector2 direction) {
-    /* I need to create a deep copy of snake.pos because I will be modifying it in this method. */
-    Vector2 head = snake.head().copy();
-    List<Float> vision = new ArrayList<>(List.of(0f, 0f, 0f));
-
-    int distance = 1;
-
-    /* Move head in the direction of the dir vector specified and continue if it is still
-    within the bounds of the grid. */
-    while (withinBounds(head.add(direction))) {
-      switch (grid[(int) head.x][(int) head.y]) {
-        /* If head comes in contact with the snake's body and vision[0] is unassigned... */
-        case SNAKE:
-          if (vision.get(0) == 0) {
-            vision.set(0, 1.0f / distance);
-          }
-          break;
-        /* If head comes in contact with an apple and vision[1] is unassigned... */
-        case APPLE:
-          if (vision.get(1) == 0) {
-            vision.set(1, 1.0f);
-          }
-          break;
-      }
-
-      distance++;
-    }
-
-    /* Sets the distance to the wall of the grid. */
-    vision.set(2, 1.0f / distance);
-
-    return vision;
-  }
-
   /* This uses the snakeLook() method to look in eight directions around the snake (i.e. NESW,
   and all diagonals). This forms as the input to the player's neural network. */
   @Override
   public List<Float> getInputs() {
-    List<Float> vision = new ArrayList<>();
+    List<Float> vision = new ArrayList<>(Collections.nCopies(NUM_INPUTS, 0f));
 
+    int i = 0;
     for (Vector2 direction : LOOKING_DIRECTIONS) {
-      vision.addAll(snakeLook(direction));
+      int baseIndex = i * INPUTS_PER_DIR;
+      /* I need to create a deep copy of snake.pos because I will be modifying it in this method. */
+      Vector2 head = snake.head().copy();
+      int distance = 1;
+
+      /* Move head in the direction of the dir vector specified and continue if it is still
+      within the bounds of the grid. */
+      while (withinBounds(head.add(direction))) {
+        switch (grid[(int) head.x][(int) head.y]) {
+          /* If head comes in contact with the snake's body and vision[0] is unassigned... */
+          case SNAKE:
+            if (vision.get(baseIndex) == 0) {
+              vision.set(baseIndex, 1.0f / distance);
+            }
+            break;
+          /* If head comes in contact with an apple and vision[1] is unassigned... */
+          case APPLE:
+            if (vision.get(baseIndex + 1) == 0) {
+              vision.set(baseIndex + 1, 1.0f);
+            }
+            break;
+        }
+
+        distance++;
+      }
+
+      /* Sets the distance to the wall of the grid. */
+      vision.set(baseIndex + 2, 1.0f / distance);
+      i++;
     }
 
     return vision;

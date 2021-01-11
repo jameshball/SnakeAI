@@ -10,7 +10,10 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
@@ -86,12 +89,12 @@ public class Population {
     System.out.printf(
         "Gen: %1$s\tMax: %2$s\tAvg: %3$s\tTime: %4$s%n",
         gen, currentMax, currentAvg, LocalDateTime.now().toLocalTime());
-    gen++;
 
     players = nextGen;
     if (gen % SAVING_FREQUENCY == 0) {
       save();
     }
+    gen++;
   }
 
   /* Crosses over the weights of two parent NNs into a child NN which is returned. Mimics breeding. */
