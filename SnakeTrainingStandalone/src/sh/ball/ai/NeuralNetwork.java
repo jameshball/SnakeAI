@@ -135,8 +135,8 @@ public class NeuralNetwork {
           /* randomGaussian() generates a random number using normalized Gaussian distribution. Dividing
           by 5 reduces how big of an impact it has on the AI's performance as it is unlikely to have a
           positive impact. */
+          m.set(i, j, (float) (m.get(i, j) + ThreadLocalRandom.current().nextGaussian() / 5));
           double cellValue = m.get(i, j);
-          m.set(i, j, (float) (cellValue + ThreadLocalRandom.current().nextGaussian() / 5));
 
           /* If the weight falls outside the -1.0 to 1.0 range after mutation, limit it to this range. */
           if (cellValue > 1) {
